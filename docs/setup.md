@@ -22,7 +22,7 @@ cmake --build build --parallel 2
 ## Tests and tools
 
 ```sh
-make test          # one placeholder; no benchmark correctness claims
+make test          # four focused math/offset/engine checks
 make format        # format only our C++ files
 make format-check  # reject formatting differences
 make tidy          # curated checks against compile_commands.json
@@ -32,14 +32,20 @@ make test-asan     # separate Clang build with ASan and UBSan
 ASan detects memory-access errors; UBSan detects instrumented undefined
 behavior. Sanitizer errors stop execution. These checks are not performance
 measurements. Do not use sanitizer/debug builds for future benchmark results.
-The stats header contains declarations only. CLI values are echoed as strings;
-numeric validation and engine execution are not implemented.
+The buffered engine performs real file I/O. Use disposable files and see the
+[usage and CSV contract](../README.md). Release builds exclude sanitizers:
+
+```sh
+cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build build-release --parallel 2
+```
 
 ## Measurement environment requirement
 
-Future measurements must use a regular test file on a mounted **real VM block
+Workload measurements must use a regular test file on a mounted **real VM block
 device**, not tmpfs or Docker OverlayFS. Use disposable test files, not a raw
-device path or valuable data. This foundation does not perform storage I/O.
+device path or valuable data. The CLI does not yet enforce filesystem type. Read setup needs write access to
+create/extend and initialize new file regions; writes overwrite existing bytes.
 
 Tmpfs is RAM-backed, and some kernel/filesystem combinations reject O_DIRECT
 with EINVAL; record the actual behavior rather than assuming it. OverlayFS can
@@ -64,4 +70,4 @@ Actions verifies the toolchain, not storage performance.
 
 Later analysis needs `fio`, `iostat` (the `sysstat` package), a kernel-compatible
 `perf`, `blktrace`/`blkparse`, and Python 3 with pandas/matplotlib. They are not
-needed for this skeleton and are not installed by its CI workflow.
+needed for buffered engine smoke checks and are not installed by CI.
