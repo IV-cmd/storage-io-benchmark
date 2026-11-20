@@ -51,8 +51,9 @@ Result Engine::Run() const {
       c.warmup.count() < 0 || (c.operations == 0 && c.duration.count() <= 0)) {
     throw std::invalid_argument("invalid path, size, duration, or warmup");
   }
-  const int fd = open(c.file.c_str(),
-                      O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK, 0600);
+  const int fd =
+      open(c.file.c_str(),
+           O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK, 0600);
   if (fd < 0) {
     throw std::system_error(errno, std::generic_category(), "open");
   }
@@ -87,8 +88,8 @@ Result Engine::Run() const {
   if (c.operations != 0) {
     result.samples.reserve(c.operations);
   }
-  const auto warmup_end = Clock::now() + c.warmup;
-  while (Clock::now() < warmup_end) {
+  const auto warmup_start = Clock::now();
+  while (Clock::now() - warmup_start < c.warmup) {
     Transfer(fd, buffer, offsets.Next(), c.operation == Operation::Write);
   }
   offsets = Offsets(c.file_size, c.block_size, c.pattern);

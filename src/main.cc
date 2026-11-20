@@ -57,7 +57,8 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
     latencies.push_back(static_cast<double>(sample.latency_ns) / 1000.0);
   }
   const auto elapsed = std::chrono::nanoseconds(result.elapsed_ns);
-  const auto stats = iobench::Summarize(std::move(latencies), c.block_size, elapsed);
+  const auto stats =
+      iobench::Summarize(std::move(latencies), c.block_size, elapsed);
   const auto op = c.operation == iobench::Operation::Read ? "read" : "write";
   const auto pattern =
       c.pattern == iobench::Pattern::Sequential ? "seq" : "rand";
@@ -81,9 +82,9 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
     std::cout << ",,," << result.samples.size() << ','
               << result.samples.size() * c.block_size << ','
               << result.elapsed_ns << ',' << stats.mib_per_second << ','
-              << stats.iops << ',' << stats.min_us << ',' << stats.mean_us << ','
-              << stats.p50_us << ',' << stats.p95_us << ',' << stats.p99_us << ','
-              << stats.max_us << '\n';
+              << stats.iops << ',' << stats.min_us << ',' << stats.mean_us
+              << ',' << stats.p50_us << ',' << stats.p95_us << ','
+              << stats.p99_us << ',' << stats.max_us << '\n';
     return;
   }
   std::cout
@@ -95,8 +96,9 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
       << " elapsed_s=" << std::chrono::duration<double>(elapsed).count()
       << " MiB/s=" << stats.mib_per_second << " IOPS=" << stats.iops << '\n'
       << "latency_us  min       mean      p50       p95       p99       max\n"
-      << "            " << stats.min_us << "  " << stats.mean_us << "  " << stats.p50_us
-      << "  " << stats.p95_us << "  " << stats.p99_us << "  " << stats.max_us << '\n';
+      << "            " << stats.min_us << "  " << stats.mean_us << "  "
+      << stats.p50_us << "  " << stats.p95_us << "  " << stats.p99_us << "  "
+      << stats.max_us << '\n';
 }
 
 }  // namespace

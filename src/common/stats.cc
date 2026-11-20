@@ -27,9 +27,12 @@ Stats Summarize(std::vector<double> samples_us, std::size_t block_size,
   const double iops = count / elapsed.count();
   return {samples_us.front(),
           std::accumulate(samples_us.begin(), samples_us.end(), 0.0) / count,
-          percentile(0.50), percentile(0.95), percentile(0.99),
+          percentile(0.50),
+          percentile(0.95),
+          percentile(0.99),
           samples_us.back(),
-          iops * static_cast<double>(block_size) / (1024 * 1024), iops};
+          iops * static_cast<double>(block_size) / (1024 * 1024),
+          iops};
 }
 
 }  // namespace iobench

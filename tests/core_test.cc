@@ -7,6 +7,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include "bench/engine.h"
 #include "common/offsets.h"
@@ -89,8 +90,9 @@ TEST(Engine, TinyWriteReadPreservesKnownBytes) {
     EXPECT_GE(sample.latency_ns, 0);
     latencies.push_back(static_cast<double>(sample.latency_ns) / 1000.0);
   }
-  const auto stats = iobench::Summarize(
-      std::move(latencies), config.block_size, std::chrono::nanoseconds(read.elapsed_ns));
+  const auto stats =
+      iobench::Summarize(std::move(latencies), config.block_size,
+                         std::chrono::nanoseconds(read.elapsed_ns));
   EXPECT_GT(stats.iops, 0);
   EXPECT_LE(stats.min_us, stats.p99_us);
   EXPECT_LE(stats.p99_us, stats.max_us);
