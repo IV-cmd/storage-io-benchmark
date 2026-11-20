@@ -1,51 +1,172 @@
+#include <charconv>
+#include <chrono>
+#include <cstdint>
+#include <iomanip>
 #include <iostream>
+#include <limits>
+#include <stdexcept>
 #include <string_view>
 
-int main(int argc, char* argv[]) {
-  std::string_view engine = "pread";
-  std::string_view block_size = "4k";
-  std::string_view queue_depth = "1";
-  std::string_view file = "iobench.data";
-  std::string_view runtime = "10";
+#include "bench/engine.h"
+#include "common/stats.h"
 
-  for (int i = 1; i < argc; ++i) {
-    const std::string_view flag = argv[i];
-    if (flag == "--help") {
-      std::cout << R"(Usage: iobench [options]
-  --engine NAME
-  --block-size SIZE
-  --queue-depth N
-  --file PATH
-  --runtime SECONDS
-Skeleton only: prints options; performs no storage I/O.
-)";
-      return 0;
-    }
-    if (i + 1 == argc) {
-      std::cerr << "Missing value for " << flag << '\n';
-      return 2;
-    }
-    const std::string_view value = argv[++i];
-    if (flag == "--engine") {
-      engine = value;
-    } else if (flag == "--block-size") {
-      block_size = value;
-    } else if (flag == "--queue-depth") {
-      queue_depth = value;
-    } else if (flag == "--file") {
-      file = value;
-    } else if (flag == "--runtime") {
-      runtime = value;
-    } else {
-      std::cerr << "Unknown option: " << flag << '\n';
-      return 2;
-    }
+namespace {
+
+std::uint64_t Number(std::string_view value, std::uint64_t scale = 1) {
+  std::uint64_t number = 0;
+  const auto [end, error] =
+      std::from_chars(value.data(), value.data() + value.size(), number);
+  if (value.empty() || error != std::errc{} ||
+      end != value.data() + value.size() ||
+      number > static_cast<std::uint64_t>(
+                   std::numeric_limits<std::int64_t>::max()) / scale) {
+    throw std::invalid_argument("invalid or overflowing numeric value");
   }
+  return number * scale;
+}
 
-  std::cout << "Skeleton only: no file or device I/O is performed.\n"
-            << "engine=" << engine << '\n'
-            << "block_size=" << block_size << '\n'
-            << "queue_depth=" << queue_depth << '\n'
-            << "file=" << file << '\n'
-            << "runtime_seconds=" << runtime << '\n';
+std::uint64_t Bytes(std::string_view value) {
+  std::uint64_t scale = 1;
+  if (!value.empty()) {
+    switch (value.back()) {
+      case 'k':
+      case 'K':
+        scale = 1024;
+        break;
+      case 'm':
+      case 'M':
+        scale = 1024 * 1024;
+        break;
+      case 'g':
+      case 'G':
+        scale = 1024 * 1024 * 1024;
+        break;
+      default:
+        return Number(value);
+    }
+    value.remove_suffix(1);
+  }
+  return Number(value, scale);
+}
+
+std::chrono::nanoseconds Duration(std::string_view value) {
+  std::uint64_t scale = 1'000'000'000;
+  if (value.ends_with("ms")) {
+    scale = 1'000'000;
+    value.remove_suffix(2);
+  } else if (value.ends_with('s')) {
+    value.remove_suffix(1);
+  }
+  return std::chrono::nanoseconds(Number(value, scale));
+}
+
+void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
+  std::vector<double> latencies;
+  latencies.reserve(result.samples.size());
+  for (const auto& sample : result.samples) {
+    latencies.push_back(sample.latency_ns / 1000.0);
+  }
+  const auto stats = iobench::SummarizeRun(
+      latencies, c.block_size, result.elapsed_ns / 1e9);
+  const auto& l = stats.latency;
+  const auto op = c.operation == iobench::Operation::Read ? "read" : "write";
+  const auto pattern =
+      c.pattern == iobench::Pattern::Sequential ? "seq" : "rand";
+  std::cout << std::fixed << std::setprecision(6);
+  if (csv) {
+    std::cout << "schema_version,record_type,op,block_size,file_size,pattern,"
+                 "warmup_ns,seq,offset,latency_ns,operations,bytes,elapsed_ns,"
+                 "mib_per_s,iops,min_us,mean_us,p50_us,p95_us,p99_us,max_us\n";
+    const auto prefix = [&](std::string_view type) {
+      std::cout << "1," << type << ',' << op << ',' << c.block_size << ','
+                << c.file_size << ',' << pattern << ',' << c.warmup.count()
+                << ',';
+    };
+    for (std::size_t i = 0; i < result.samples.size(); ++i) {
+      const auto& sample = result.samples[i];
+      prefix("sample");
+      std::cout << i << ',' << sample.offset << ',' << sample.latency_ns
+                << ",,,,,,,,,,,\n";
+    }
+    prefix("summary");
+    std::cout << ",,," << result.samples.size() << ','
+              << result.samples.size() * c.block_size << ',' << result.elapsed_ns
+              << ',' << stats.mib_per_second << ',' << stats.iops << ','
+              << l.min_us << ',' << l.mean_us << ',' << l.p50_us << ','
+              << l.p95_us << ',' << l.p99_us << ',' << l.max_us << '\n';
+    return;
+  }
+  std::cout << "Buffered I/O; no fsync; unvalidated against fio.\n"
+            << "op=" << op << " pattern=" << pattern
+            << " block_size=" << c.block_size << " file_size=" << c.file_size
+            << " warmup_ns=" << c.warmup.count() << '\n'
+            << "operations=" << result.samples.size()
+            << " elapsed_s=" << result.elapsed_ns / 1e9
+            << " MiB/s=" << stats.mib_per_second << " IOPS=" << stats.iops
+            << '\n'
+            << "latency_us  min       mean      p50       p95       p99       max\n"
+            << "            " << l.min_us << "  " << l.mean_us << "  " << l.p50_us
+            << "  " << l.p95_us << "  " << l.p99_us << "  " << l.max_us << '\n';
+}
+
+}  // namespace
+
+int main(int argc, char* argv[]) {
+  try {
+    iobench::Config config;
+    bool csv = false;
+    for (int i = 1; i < argc; ++i) {
+      const std::string_view flag = argv[i];
+      if (flag == "--help") {
+        std::cout << R"(Usage: iobench --file PATH [options]
+  --pattern seq|rand       default: seq
+  --op read|write          default: read
+  --block-size SIZE        bytes or binary k/m/g suffix; default: 4k
+  --file-size SIZE         positive block multiple; default: 1g
+  --duration TIME          integer seconds or ms suffix; default: 5s
+  --ops N                  positive measured operation count; overrides duration
+  --warmup TIME            discarded time-based phase; default: 1s; 0 disables
+  --output table|csv       default: table
+WARNING: use disposable regular files only. Writes overwrite their contents.
+Read setup creates/extends files and populates new bytes before timing.
+Single-threaded buffered pread/pwrite only; no durability or fio validation.
+)";
+        return 0;
+      }
+      if (i + 1 == argc) {
+        throw std::invalid_argument("missing option value");
+      }
+      const std::string_view value = argv[++i];
+      if (flag == "--file") {
+        config.file = value;
+      } else if (flag == "--pattern" && (value == "seq" || value == "rand")) {
+        config.pattern = value == "seq" ? iobench::Pattern::Sequential
+                                        : iobench::Pattern::Random;
+      } else if (flag == "--op" && (value == "read" || value == "write")) {
+        config.operation = value == "read" ? iobench::Operation::Read
+                                           : iobench::Operation::Write;
+      } else if (flag == "--block-size") {
+        config.block_size = Bytes(value);
+      } else if (flag == "--file-size") {
+        config.file_size = Bytes(value);
+      } else if (flag == "--duration") {
+        config.duration = Duration(value);
+      } else if (flag == "--ops") {
+        config.operations = Number(value);
+        if (config.operations == 0) {
+          throw std::invalid_argument("--ops must be positive");
+        }
+      } else if (flag == "--warmup") {
+        config.warmup = Duration(value);
+      } else if (flag == "--output" && (value == "csv" || value == "table")) {
+        csv = value == "csv";
+      } else {
+        throw std::invalid_argument("unknown option or invalid value");
+      }
+    }
+    Print(config, iobench::Engine(config).Run(), csv);
+  } catch (const std::exception& error) {
+    std::cerr << "iobench: " << error.what() << '\n';
+    return 2;
+  }
 }

@@ -27,7 +27,8 @@ jobs:
       - name: Build
         run: make build
       - name: Check formatting
-        run: make format-check
+        run: |
+          make format-check || { make format; git diff -- src tests; exit 1; }
       - name: Run clang-tidy
         run: make tidy
       - name: Build and test under ASan and UBSan
@@ -35,8 +36,35 @@ jobs:
         env:
           ASAN_OPTIONS: detect_leaks=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      - name: Run the command-line stub
+      - name: Exercise buffered workloads and CSV output
         run: |
+          mkdir -p results
           ./build/iobench --help
-          ./build/iobench --engine pread --block-size 4k --queue-depth 1 --file "$RUNNER_TEMP/iobench-unused" --runtime 1
-          test ! -e "$RUNNER_TEMP/iobench-unused"
+          findmnt -T "$RUNNER_TEMP" -o SOURCE,FSTYPE,OPTIONS > results/environment.txt
+          uname -a >> results/environment.txt
+          cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+          cmake --build build-release --parallel 2
+          ./build-release/iobench --file "$RUNNER_TEMP/iobench.data" --pattern seq --op write --block-size 4k --file-size 16m --duration 5s --warmup 1s | tee results/seq-write.txt
+          ./build-release/iobench --file "$RUNNER_TEMP/iobench.data" --pattern rand --op read --block-size 4k --file-size 16m --duration 1s --warmup 1s | tee results/rand-read.txt
+          ./build-release/iobench --file "$RUNNER_TEMP/iobench.data" --pattern seq --op write --block-size 4k --file-size 16m --ops 8 --warmup 0 --output csv > results/seq-write.csv
+          ./build-release/iobench --file "$RUNNER_TEMP/iobench.data" --pattern rand --op read --block-size 4k --file-size 16m --ops 8 --warmup 0 --output csv > results/rand-read.csv
+          python3 - <<'PY'
+          import csv
+          from pathlib import Path
+          for path in Path("results").glob("*.csv"):
+              with path.open() as stream:
+                  rows = list(csv.DictReader(stream))
+              assert all(None not in row and None not in row.values() for row in rows)
+              samples = [r for r in rows if r["record_type"] == "sample"]
+              summary, = [r for r in rows if r["record_type"] == "summary"]
+              assert len(samples) == int(summary["operations"]) == 8
+              assert int(summary["bytes"]) == 8 * 4096
+              assert all(int(r["latency_ns"]) >= 0 for r in samples)
+              print(path, "parsed: 8 samples and one summary")
+          PY
+      - name: Upload sample output (not validated storage results)
+        uses: actions/upload-artifact@v4
+        with:
+          name: buffered-smoke-output
+          path: results/
+          if-no-files-found: error
