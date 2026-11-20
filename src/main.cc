@@ -6,6 +6,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string_view>
+#include <vector>
 
 #include "bench/engine.h"
 #include "common/stats.h"
@@ -18,8 +19,9 @@ std::uint64_t Number(std::string_view value, std::uint64_t scale = 1) {
       std::from_chars(value.data(), value.data() + value.size(), number);
   if (value.empty() || error != std::errc{} ||
       end != value.data() + value.size() ||
-      number > static_cast<std::uint64_t>(
-                   std::numeric_limits<std::int64_t>::max()) / scale) {
+      number >
+          static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()) /
+              scale) {
     throw std::invalid_argument("invalid or overflowing numeric value");
   }
   return number * scale;
@@ -66,8 +68,8 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
   for (const auto& sample : result.samples) {
     latencies.push_back(sample.latency_ns / 1000.0);
   }
-  const auto stats = iobench::SummarizeRun(
-      latencies, c.block_size, result.elapsed_ns / 1e9);
+  const auto stats =
+      iobench::SummarizeRun(latencies, c.block_size, result.elapsed_ns / 1e9);
   const auto& l = stats.latency;
   const auto op = c.operation == iobench::Operation::Read ? "read" : "write";
   const auto pattern =
@@ -90,23 +92,24 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
     }
     prefix("summary");
     std::cout << ",,," << result.samples.size() << ','
-              << result.samples.size() * c.block_size << ',' << result.elapsed_ns
-              << ',' << stats.mib_per_second << ',' << stats.iops << ','
-              << l.min_us << ',' << l.mean_us << ',' << l.p50_us << ','
-              << l.p95_us << ',' << l.p99_us << ',' << l.max_us << '\n';
+              << result.samples.size() * c.block_size << ','
+              << result.elapsed_ns << ',' << stats.mib_per_second << ','
+              << stats.iops << ',' << l.min_us << ',' << l.mean_us << ','
+              << l.p50_us << ',' << l.p95_us << ',' << l.p99_us << ','
+              << l.max_us << '\n';
     return;
   }
-  std::cout << "Buffered I/O; no fsync; unvalidated against fio.\n"
-            << "op=" << op << " pattern=" << pattern
-            << " block_size=" << c.block_size << " file_size=" << c.file_size
-            << " warmup_ns=" << c.warmup.count() << '\n'
-            << "operations=" << result.samples.size()
-            << " elapsed_s=" << result.elapsed_ns / 1e9
-            << " MiB/s=" << stats.mib_per_second << " IOPS=" << stats.iops
-            << '\n'
-            << "latency_us  min       mean      p50       p95       p99       max\n"
-            << "            " << l.min_us << "  " << l.mean_us << "  " << l.p50_us
-            << "  " << l.p95_us << "  " << l.p99_us << "  " << l.max_us << '\n';
+  std::cout
+      << "Buffered I/O; no fsync; unvalidated against fio.\n"
+      << "op=" << op << " pattern=" << pattern << " block_size=" << c.block_size
+      << " file_size=" << c.file_size << " warmup_ns=" << c.warmup.count()
+      << '\n'
+      << "operations=" << result.samples.size()
+      << " elapsed_s=" << result.elapsed_ns / 1e9
+      << " MiB/s=" << stats.mib_per_second << " IOPS=" << stats.iops << '\n'
+      << "latency_us  min       mean      p50       p95       p99       max\n"
+      << "            " << l.min_us << "  " << l.mean_us << "  " << l.p50_us
+      << "  " << l.p95_us << "  " << l.p99_us << "  " << l.max_us << '\n';
 }
 
 }  // namespace

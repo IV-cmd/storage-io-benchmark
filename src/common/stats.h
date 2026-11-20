@@ -22,7 +22,7 @@ struct RunStats {
 
 double Percentile(std::span<const double> samples_us, double percentile);
 LatencyStats SummarizeLatency(std::span<const double> samples_us);
-RunStats SummarizeRun(std::span<const double> samples_us, std::size_t block_size,
-                      double elapsed_seconds);
+RunStats SummarizeRun(std::span<const double> samples_us,
+                      std::size_t block_size, double elapsed_seconds);
 
 }  // namespace iobench

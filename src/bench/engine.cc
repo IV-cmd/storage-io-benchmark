@@ -21,7 +21,8 @@ class File {
  public:
   explicit File(const std::string& path)
       : fd_(open(path.c_str(),
-                 O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK, 0600)) {
+                 O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK,
+                 0600)) {
     if (fd_ < 0) {
       throw std::system_error(errno, std::generic_category(), "open");
     }
@@ -35,15 +36,14 @@ class File {
   int fd_;
 };
 
-void Transfer(int fd, std::span<char> buffer, std::uint64_t offset, bool write) {
+void Transfer(int fd, std::span<char> buffer, std::uint64_t offset,
+              bool write) {
   std::size_t done = 0;
   while (done < buffer.size()) {
     const auto position = static_cast<off_t>(offset + done);
-    const auto count = write
-                           ? pwrite(fd, buffer.data() + done,
-                                    buffer.size() - done, position)
-                           : pread(fd, buffer.data() + done,
-                                   buffer.size() - done, position);
+    const auto count =
+        write ? pwrite(fd, buffer.data() + done, buffer.size() - done, position)
+              : pread(fd, buffer.data() + done, buffer.size() - done, position);
     if (count < 0) {
       if (errno == EINTR) {
         continue;
@@ -61,9 +61,10 @@ void Transfer(int fd, std::span<char> buffer, std::uint64_t offset, bool write) 
 
 Result Engine::Run() const {
   const auto& c = config_;
-  Offsets validate(c.file_size, c.block_size, c.pattern);
+  Offsets offsets(c.file_size, c.block_size, c.pattern);
   if (c.file.empty() ||
-      c.file_size > static_cast<std::uint64_t>(std::numeric_limits<off_t>::max()) ||
+      c.file_size >
+          static_cast<std::uint64_t>(std::numeric_limits<off_t>::max()) ||
       c.block_size >
           static_cast<std::uint64_t>(std::numeric_limits<ssize_t>::max()) ||
       c.warmup.count() < 0 || (c.operations == 0 && c.duration.count() <= 0)) {
@@ -98,17 +99,18 @@ Result Engine::Run() const {
     result.samples.reserve(c.operations);
   }
   const auto run_phase = [&](Nanoseconds duration, bool measured) {
-    Offsets offsets(c.file_size, c.block_size, c.pattern);
+    offsets = Offsets(c.file_size, c.block_size, c.pattern);
     const auto start = Clock::now();
     for (std::uint64_t i = 0;
          measured && c.operations != 0 ? i < c.operations
-                                      : Clock::now() - start < duration;
+                                       : Clock::now() - start < duration;
          ++i) {
       const auto offset = offsets.Next();
       const auto before = Clock::now();
       Transfer(file.Get(), buffer, offset, c.operation == Operation::Write);
       const auto latency =
-          std::chrono::duration_cast<Nanoseconds>(Clock::now() - before).count();
+          std::chrono::duration_cast<Nanoseconds>(Clock::now() - before)
+              .count();
       if (measured) {
         result.samples.push_back({offset, latency});
       }

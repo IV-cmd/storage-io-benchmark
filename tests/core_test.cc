@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
+#include <unistd.h>
 
 #include <array>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
-#include <string>
-#include <unistd.h>
 #include <stdexcept>
+#include <string>
 
 #include "bench/engine.h"
 #include "common/offsets.h"
@@ -51,10 +51,15 @@ TEST(Offsets, SequentialWrapAndRandomBounds) {
     EXPECT_EQ(sequential.Next(), (i % 4) * 4096);
   }
   iobench::Offsets random(4 * 4096, 4096, iobench::Pattern::Random);
+  std::array<bool, 4> seen{};
   for (int i = 0; i < 1000; ++i) {
     const auto offset = random.Next();
     EXPECT_EQ(offset % 4096, 0);
-    EXPECT_LT(offset, 4 * 4096);
+    ASSERT_LT(offset, 4 * 4096);
+    seen[offset / 4096] = true;
+  }
+  for (bool hit : seen) {
+    EXPECT_TRUE(hit);
   }
   EXPECT_THROW((iobench::Offsets(4096, 0, iobench::Pattern::Sequential)),
                std::invalid_argument);
@@ -77,7 +82,7 @@ TEST(Engine, TinyWriteReadPreservesKnownBytes) {
   config.file = path;
   config.file_size = 4 * 4096;
   config.operations = 4;
-  config.warmup = std::chrono::nanoseconds::zero();
+  config.warmup = std::chrono::milliseconds(1);
   config.operation = iobench::Operation::Write;
   const auto write = iobench::Engine(config).Run();
   ASSERT_EQ(write.samples.size(), 4);
@@ -91,8 +96,8 @@ TEST(Engine, TinyWriteReadPreservesKnownBytes) {
     EXPECT_GE(sample.latency_ns, 0);
     latencies.push_back(sample.latency_ns / 1000.0);
   }
-  const auto stats = iobench::SummarizeRun(
-      latencies, config.block_size, read.elapsed_ns / 1e9);
+  const auto stats = iobench::SummarizeRun(latencies, config.block_size,
+                                           read.elapsed_ns / 1e9);
   EXPECT_GT(stats.iops, 0);
   EXPECT_LE(stats.latency.min_us, stats.latency.p50_us);
   EXPECT_LE(stats.latency.p50_us, stats.latency.p99_us);
