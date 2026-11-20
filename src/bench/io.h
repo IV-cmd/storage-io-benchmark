@@ -53,5 +53,6 @@ class Io {
 };
 
 std::unique_ptr<Io> MakeIo(const Config& config);
+std::unique_ptr<Io> MakeIoUring(const Config& config);
 
 }  // namespace iobench

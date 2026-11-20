@@ -14,7 +14,10 @@ if(IOBENCH_SANITIZERS)
 endif()
 
 add_library(iobench_core src/common/stats.cc src/bench/engine.cc
-                         src/bench/io.cc src/bench/direct.cc src/bench/sync.cc)
+                         src/bench/io.cc src/bench/direct.cc src/bench/sync.cc
+                         src/bench/iouring.cc)
+find_library(URING_LIBRARY uring REQUIRED)
+target_link_libraries(iobench_core PUBLIC ${URING_LIBRARY})
 target_include_directories(iobench_core PUBLIC src)
 target_compile_options(iobench_core PRIVATE -Wall -Wextra)
 

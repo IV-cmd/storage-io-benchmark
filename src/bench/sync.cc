@@ -57,7 +57,7 @@ void Transfer(int fd, std::span<char> buffer, std::uint64_t offset, bool write,
 }
 
 std::unique_ptr<Io> MakeIo(const Config& config) {
-  if (config.iodepth != 1) {
+  if (config.engine != "iouring" && config.iodepth != 1) {
     throw std::invalid_argument("sync and odirect require --iodepth 1");
   }
   std::unique_ptr<Io> io;
@@ -65,6 +65,8 @@ std::unique_ptr<Io> MakeIo(const Config& config) {
     io = std::make_unique<SyncEngine>(config);
   } else if (config.engine == "odirect") {
     io = std::make_unique<ODirectEngine>(config);
+  } else if (config.engine == "iouring") {
+    io = MakeIoUring(config);
   } else {
     throw std::invalid_argument("unknown engine");
   }
