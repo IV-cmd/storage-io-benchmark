@@ -1,15 +1,18 @@
 #include <gtest/gtest.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <array>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <utility>
 
 #include "bench/engine.h"
+#include "bench/io.h"
 #include "common/offsets.h"
 #include "common/stats.h"
 
@@ -99,4 +102,47 @@ TEST(Engine, TinyWriteReadPreservesKnownBytes) {
   std::ifstream input(path, std::ios::binary);
   const std::string bytes((std::istreambuf_iterator<char>(input)), {});
   EXPECT_EQ(bytes, std::string(config.file_size, '\x5a'));
+}
+
+TEST(DirectIo, MisalignmentFailsBeforeIssuingIo) {
+  alignas(4096) std::array<char, 8192> buffer{};
+  const iobench::Alignment alignment{4096, 4096, 4096};
+  EXPECT_NO_THROW(iobench::CheckAlignment(buffer.data(), 0, 4096, alignment));
+  // An invalid fd would yield EBADF if the guard let any request reach pread.
+  EXPECT_THROW(iobench::Transfer(-1, std::span(buffer.data() + 1, 4096), 0,
+                                 false, alignment),
+               std::invalid_argument);
+  EXPECT_THROW(iobench::Transfer(-1, std::span(buffer.data(), 4096), 1, false,
+                                 alignment),
+               std::invalid_argument);
+  EXPECT_THROW(iobench::Transfer(-1, std::span(buffer.data(), 4095), 0, false,
+                                 alignment),
+               std::invalid_argument);
+}
+
+TEST(IoUring, SubmissionsAndCompletionsMatchRequestedOperations) {
+  std::string path =
+      (std::filesystem::temp_directory_path() / "iobench-XXXXXX").string();
+  const int fd = mkstemp(path.data());
+  ASSERT_GE(fd, 0);
+  close(fd);
+  struct Cleanup {
+    std::string path;
+    ~Cleanup() { std::filesystem::remove(path); }
+  } cleanup{path};
+
+  iobench::Config config;
+  config.file = path;
+  config.engine = "iouring";
+  config.iodepth = 32;
+  config.file_size = 4ULL * 1024 * 1024;
+  config.warmup = std::chrono::milliseconds(1);
+  for (const std::uint64_t count : {7, 77}) {
+    config.operations = count;
+    const auto result = iobench::Engine(config).Run();
+    EXPECT_EQ(result.samples.size(), count);
+    EXPECT_EQ(result.submitted, count);
+    EXPECT_EQ(result.completed, count);
+    EXPECT_EQ(result.max_inflight, std::min<std::uint64_t>(count, 32));
+  }
 }

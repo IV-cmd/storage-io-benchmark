@@ -64,19 +64,21 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
       c.pattern == iobench::Pattern::Sequential ? "seq" : "rand";
   std::cout << std::fixed << std::setprecision(6);
   if (csv) {
-    std::cout << "schema_version,record_type,op,block_size,file_size,pattern,"
+    std::cout << "schema_version,record_type,engine,iodepth,op,block_size,file_"
+                 "size,pattern,"
                  "warmup_ns,seq,offset,latency_ns,operations,bytes,elapsed_ns,"
-                 "mib_per_s,iops,min_us,mean_us,p50_us,p95_us,p99_us,max_us\n";
+                 "mib_per_s,iops,min_us,mean_us,p50_us,p95_us,p99_us,max_us,"
+                 "submitted,completed,max_inflight\n";
     const auto prefix = [&](std::string_view type) {
-      std::cout << "1," << type << ',' << op << ',' << c.block_size << ','
-                << c.file_size << ',' << pattern << ',' << c.warmup.count()
-                << ',';
+      std::cout << "2," << type << ',' << c.engine << ',' << c.iodepth << ','
+                << op << ',' << c.block_size << ',' << c.file_size << ','
+                << pattern << ',' << c.warmup.count() << ',';
     };
     for (std::size_t i = 0; i < result.samples.size(); ++i) {
       const auto& sample = result.samples[i];
       prefix("sample");
       std::cout << i << ',' << sample.offset << ',' << sample.latency_ns
-                << ",,,,,,,,,,,\n";
+                << ",,,,,,,,,,,,,,\n";
     }
     prefix("summary");
     std::cout << ",,," << result.samples.size() << ','
@@ -84,14 +86,18 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
               << result.elapsed_ns << ',' << stats.mib_per_second << ','
               << stats.iops << ',' << stats.min_us << ',' << stats.mean_us
               << ',' << stats.p50_us << ',' << stats.p95_us << ','
-              << stats.p99_us << ',' << stats.max_us << '\n';
+              << stats.p99_us << ',' << stats.max_us << ',' << result.submitted
+              << ',' << result.completed << ',' << result.max_inflight << '\n';
     return;
   }
   std::cout
-      << "Buffered I/O; no fsync; unvalidated against fio.\n"
+      << "No fsync; unvalidated against fio.\n"
+      << "engine=" << c.engine << " iodepth=" << c.iodepth << '\n'
       << "op=" << op << " pattern=" << pattern << " block_size=" << c.block_size
       << " file_size=" << c.file_size << " warmup_ns=" << c.warmup.count()
       << '\n'
+      << "submitted=" << result.submitted << " completed=" << result.completed
+      << " max_inflight=" << result.max_inflight << '\n'
       << "operations=" << result.samples.size()
       << " elapsed_s=" << std::chrono::duration<double>(elapsed).count()
       << " MiB/s=" << stats.mib_per_second << " IOPS=" << stats.iops << '\n'
@@ -111,6 +117,8 @@ int main(int argc, char* argv[]) {
       const std::string_view flag = argv[i];
       if (flag == "--help") {
         std::cout << R"(Usage: iobench --file PATH [options]
+  --engine sync|odirect|iouring  default: sync; iouring uses O_DIRECT
+  --iodepth N              default: 1; sync/odirect require 1
   --pattern seq|rand       default: seq
   --op read|write          default: read
   --block-size SIZE        bytes or binary k/m/g suffix; default: 4k
@@ -121,7 +129,8 @@ int main(int argc, char* argv[]) {
   --output table|csv       default: table
 WARNING: use disposable regular files only. Writes overwrite their contents.
 Read setup creates/extends files and populates new bytes before timing.
-Single-threaded buffered pread/pwrite only; no durability or fio validation.
+One userspace thread; O_DIRECT needs a supported block-backed filesystem.
+No durability or fio validation.
 )";
         return 0;
       }
@@ -131,6 +140,16 @@ Single-threaded buffered pread/pwrite only; no durability or fio validation.
       const std::string_view value = argv[++i];
       if (flag == "--file") {
         config.file = value;
+      } else if (flag == "--engine" && (value == "sync" || value == "odirect" ||
+                                        value == "iouring")) {
+        config.engine = value;
+      } else if (flag == "--iodepth") {
+        const auto depth = Number(value);
+        if (depth == 0 || depth > std::numeric_limits<unsigned>::max()) {
+          throw std::invalid_argument(
+              "--iodepth must fit a positive unsigned integer");
+        }
+        config.iodepth = static_cast<unsigned>(depth);
       } else if (flag == "--pattern" && (value == "seq" || value == "rand")) {
         config.pattern = value == "seq" ? iobench::Pattern::Sequential
                                         : iobench::Pattern::Random;
