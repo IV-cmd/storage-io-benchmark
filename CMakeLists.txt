@@ -13,7 +13,8 @@ if(IOBENCH_SANITIZERS)
   add_link_options(-fsanitize=address,undefined)
 endif()
 
-add_library(iobench_core src/common/stats.cc src/bench/engine.cc)
+add_library(iobench_core src/common/stats.cc src/bench/engine.cc
+                         src/bench/io.cc src/bench/direct.cc src/bench/sync.cc)
 target_include_directories(iobench_core PUBLIC src)
 target_compile_options(iobench_core PRIVATE -Wall -Wextra)
 

@@ -14,6 +14,8 @@ enum class Operation : std::uint8_t { Read, Write };
 
 struct Config {
   std::string file;
+  std::string engine = "sync";
+  unsigned iodepth = 1;
   Pattern pattern = Pattern::Sequential;
   Operation operation = Operation::Read;
   std::uint64_t block_size = 4096;
@@ -31,6 +33,9 @@ struct Sample {
 struct Result {
   std::vector<Sample> samples;
   std::int64_t elapsed_ns = 0;
+  std::uint64_t submitted = 0;
+  std::uint64_t completed = 0;
+  unsigned max_inflight = 0;
 };
 
 class Engine {
