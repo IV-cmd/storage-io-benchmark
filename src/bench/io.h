@@ -16,8 +16,8 @@ struct Alignment {
 };
 
 Alignment DirectAlignment(int fd);
-void CheckAlignment(const void* buffer, std::uint64_t offset, std::size_t length,
-                    Alignment alignment);
+void CheckAlignment(const void* buffer, std::uint64_t offset,
+                    std::size_t length, Alignment alignment);
 void Transfer(int fd, std::span<char> buffer, std::uint64_t offset, bool write,
               Alignment alignment = {});
 

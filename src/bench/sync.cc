@@ -1,10 +1,10 @@
-#include "bench/io.h"
-
 #include <unistd.h>
 
 #include <cerrno>
 #include <stdexcept>
 #include <system_error>
+
+#include "bench/io.h"
 
 namespace iobench {
 namespace {

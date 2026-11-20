@@ -1,5 +1,3 @@
-#include "bench/io.h"
-
 #include <liburing.h>
 
 #include <cerrno>
@@ -7,6 +5,8 @@
 #include <limits>
 #include <stdexcept>
 #include <system_error>
+
+#include "bench/io.h"
 
 namespace iobench {
 namespace {
@@ -16,11 +16,13 @@ class IoUringEngine final : public Io {
   explicit IoUringEngine(const Config& config)
       : Io(config, true, config.iodepth) {
     if (config.block_size > std::numeric_limits<unsigned>::max()) {
-      throw std::invalid_argument("io_uring block size exceeds its length field");
+      throw std::invalid_argument(
+          "io_uring block size exceeds its length field");
     }
     const int error = io_uring_queue_init(config.iodepth, &ring_, 0);
     if (error < 0) {
-      throw std::system_error(-error, std::generic_category(), "io_uring setup");
+      throw std::system_error(-error, std::generic_category(),
+                              "io_uring setup");
     }
   }
 
@@ -59,7 +61,8 @@ class IoUringEngine final : public Io {
         continue;
       }
       if (count < 0) {
-        throw std::system_error(-count, std::generic_category(), "io_uring submit");
+        throw std::system_error(-count, std::generic_category(),
+                                "io_uring submit");
       }
       if (count == 0 || static_cast<unsigned>(count) > pending_) {
         throw std::runtime_error("io_uring made invalid submission progress");

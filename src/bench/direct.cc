@@ -1,5 +1,3 @@
-#include "bench/io.h"
-
 #include <fcntl.h>
 #include <linux/magic.h>
 #include <sys/stat.h>
@@ -12,6 +10,8 @@
 #include <numeric>
 #include <stdexcept>
 #include <system_error>
+
+#include "bench/io.h"
 
 namespace iobench {
 
@@ -46,15 +46,16 @@ Alignment DirectAlignment(int fd) {
   if (logical == 0) {
     throw std::runtime_error("cannot query backing device logical block size");
   }
-  return {info.stx_dio_mem_align,
-          std::lcm(logical, info.stx_dio_offset_align), logical};
+  return {info.stx_dio_mem_align, std::lcm(logical, info.stx_dio_offset_align),
+          logical};
 }
 
-void CheckAlignment(const void* buffer, std::uint64_t offset, std::size_t length,
-                    Alignment alignment) {
+void CheckAlignment(const void* buffer, std::uint64_t offset,
+                    std::size_t length, Alignment alignment) {
   if (reinterpret_cast<std::uintptr_t>(buffer) % alignment.memory != 0 ||
       offset % alignment.offset != 0 || length % alignment.offset != 0) {
-    throw std::invalid_argument("misaligned direct-I/O buffer, offset, or length");
+    throw std::invalid_argument(
+        "misaligned direct-I/O buffer, offset, or length");
   }
 }
 

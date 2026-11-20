@@ -61,7 +61,8 @@ Result RunPhase(Io& io, const Config& config, Nanoseconds duration,
     if (record) {
       result.samples.push_back(
           {request.offset,
-           std::chrono::duration_cast<Nanoseconds>(end - request.start).count()});
+           std::chrono::duration_cast<Nanoseconds>(end - request.start)
+               .count()});
     }
     request.active = false;
     --active;
@@ -91,7 +92,8 @@ Result Engine::Run() const {
       c.block_size >
           static_cast<std::uint64_t>(std::numeric_limits<ssize_t>::max()) ||
       c.warmup.count() < 0 || (c.operations == 0 && c.duration.count() <= 0)) {
-    throw std::invalid_argument("invalid path, size, duration, warmup, or depth");
+    throw std::invalid_argument(
+        "invalid path, size, duration, warmup, or depth");
   }
   auto io = MakeIo(c);
   RunPhase(*io, c, c.warmup, 0, false);

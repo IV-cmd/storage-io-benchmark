@@ -54,7 +54,8 @@ void Io::Prepare() {
   const int allocation =
       posix_memalign(&memory_, memory_alignment, stride_ * depth_);
   if (allocation != 0) {
-    throw std::system_error(allocation, std::generic_category(), "posix_memalign");
+    throw std::system_error(allocation, std::generic_category(),
+                            "posix_memalign");
   }
   CheckAlignment(memory_, 0, config_.block_size, alignment_);
   std::memset(memory_, 0x5a, stride_ * depth_);
@@ -69,7 +70,8 @@ void Io::Prepare() {
   }
   const int flags = fcntl(fd_, F_GETFL);
   if (flags < 0 || fcntl(fd_, F_SETFL, flags & ~O_DIRECT) != 0) {
-    throw std::system_error(errno, std::generic_category(), "buffered read setup");
+    throw std::system_error(errno, std::generic_category(),
+                            "buffered read setup");
   }
   for (auto offset = static_cast<std::uint64_t>(info.st_size);
        offset < config_.file_size;) {
@@ -78,7 +80,8 @@ void Io::Prepare() {
     offset += count;
   }
   if (fcntl(fd_, F_SETFL, flags) != 0) {
-    throw std::system_error(errno, std::generic_category(), "restore I/O flags");
+    throw std::system_error(errno, std::generic_category(),
+                            "restore I/O flags");
   }
 }
 
