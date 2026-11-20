@@ -58,14 +58,16 @@ existing sparse/unwritten extents are not detected or populated.
 
 Percentiles use linear interpolation at sorted position `(n - 1) * p / 100`.
 The pure stats API returns zero-valued latency statistics for empty input and
-rejects invalid percentiles or nonpositive elapsed time. Engine runs with no
+rejects nonpositive or nonfinite elapsed time. Engine runs with no
 samples fail rather than presenting empty measurements.
 
 **Buffered completion is not durability or device throughput.** There is no
 `fsync`, cache eviction, readahead control, or scheduler control. Newly populated
 read data and warmup affect the page cache; dirty-page throttling affects writes.
 Preallocation happens before timing, but unwritten-extent conversion and other
-filesystem work can still affect writes. Raw samples use memory proportional to
+filesystem work can still affect writes. Writes use a fixed, compressible byte
+pattern; compression/deduplication can distort physical-I/O comparisons.
+Raw samples use memory proportional to
 the operation count; large/long runs can exhaust memory. Avoid concurrent changes
 to the target. The time limit is checked between operations, not during a syscall.
 

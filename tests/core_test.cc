@@ -2,7 +2,6 @@
 #include <unistd.h>
 
 #include <array>
-#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -13,49 +12,43 @@
 #include "common/offsets.h"
 #include "common/stats.h"
 
-TEST(Stats, PercentileEdgeCases) {
-  EXPECT_DOUBLE_EQ(iobench::Percentile({}, 99), 0);
-  const std::array single{7.0};
-  EXPECT_DOUBLE_EQ(iobench::Percentile(single, 0), 7);
-  EXPECT_DOUBLE_EQ(iobench::Percentile(single, 99), 7);
-  const std::array samples{9.0, 1.0, 7.0, 3.0};
-  EXPECT_DOUBLE_EQ(iobench::Percentile(samples, 0), 1);
-  EXPECT_DOUBLE_EQ(iobench::Percentile(samples, 50), 5);
-  EXPECT_NEAR(iobench::Percentile(samples, 95), 8.7, 1e-12);
-  EXPECT_NEAR(iobench::Percentile(samples, 99), 8.94, 1e-12);
-  EXPECT_DOUBLE_EQ(iobench::Percentile(samples, 100), 9);
-  EXPECT_DOUBLE_EQ(samples[0], 9);
-  EXPECT_THROW(iobench::Percentile(samples, -1), std::invalid_argument);
-  EXPECT_THROW(iobench::Percentile(samples, NAN), std::invalid_argument);
+TEST(Stats, EmptyAndSingleSample) {
+  const auto second = std::chrono::seconds(1);
+  EXPECT_DOUBLE_EQ(iobench::Summarize({}, 4096, second).p99_us, 0);
+  const auto single = iobench::Summarize({7}, 4096, second);
+  EXPECT_DOUBLE_EQ(single.min_us, 7);
+  EXPECT_DOUBLE_EQ(single.mean_us, 7);
+  EXPECT_DOUBLE_EQ(single.p50_us, 7);
+  EXPECT_DOUBLE_EQ(single.p99_us, 7);
+  EXPECT_DOUBLE_EQ(single.max_us, 7);
 }
 
-TEST(Stats, SummaryAndRates) {
-  const std::array samples{9.0, 1.0, 7.0, 3.0};
-  const auto stats = iobench::SummarizeRun(samples, 4096, 2);
-  EXPECT_DOUBLE_EQ(stats.latency.min_us, 1);
-  EXPECT_DOUBLE_EQ(stats.latency.mean_us, 5);
-  EXPECT_DOUBLE_EQ(stats.latency.p50_us, 5);
-  EXPECT_NEAR(stats.latency.p95_us, 8.7, 1e-12);
-  EXPECT_NEAR(stats.latency.p99_us, 8.94, 1e-12);
-  EXPECT_DOUBLE_EQ(stats.latency.max_us, 9);
+TEST(Stats, UnsortedPercentilesAndRates) {
+  const auto stats =
+      iobench::Summarize({9, 1, 7, 3}, 4096, std::chrono::seconds(2));
+  EXPECT_DOUBLE_EQ(stats.min_us, 1);
+  EXPECT_DOUBLE_EQ(stats.mean_us, 5);
+  EXPECT_DOUBLE_EQ(stats.p50_us, 5);
+  EXPECT_NEAR(stats.p95_us, 8.7, 1e-12);
+  EXPECT_NEAR(stats.p99_us, 8.94, 1e-12);
+  EXPECT_DOUBLE_EQ(stats.max_us, 9);
   EXPECT_DOUBLE_EQ(stats.iops, 2);
   EXPECT_DOUBLE_EQ(stats.mib_per_second, 0.0078125);
-  EXPECT_DOUBLE_EQ(iobench::SummarizeRun({}, 4096, 1).iops, 0);
-  EXPECT_DOUBLE_EQ(iobench::SummarizeLatency({}).max_us, 0);
-  EXPECT_THROW(iobench::SummarizeRun(samples, 4096, 0), std::invalid_argument);
+  EXPECT_THROW(iobench::Summarize({1}, 4096, std::chrono::seconds(0)),
+               std::invalid_argument);
 }
 
 TEST(Offsets, SequentialWrapAndRandomBounds) {
-  iobench::Offsets sequential(4 * 4096, 4096, iobench::Pattern::Sequential);
+  iobench::Offsets sequential(4ULL * 4096, 4096, iobench::Pattern::Sequential);
   for (std::uint64_t i = 0; i < 12; ++i) {
     EXPECT_EQ(sequential.Next(), (i % 4) * 4096);
   }
-  iobench::Offsets random(4 * 4096, 4096, iobench::Pattern::Random);
+  iobench::Offsets random(4ULL * 4096, 4096, iobench::Pattern::Random);
   std::array<bool, 4> seen{};
   for (int i = 0; i < 1000; ++i) {
     const auto offset = random.Next();
     EXPECT_EQ(offset % 4096, 0);
-    ASSERT_LT(offset, 4 * 4096);
+    ASSERT_LT(offset, 4ULL * 4096);
     seen[offset / 4096] = true;
   }
   for (bool hit : seen) {
@@ -80,7 +73,7 @@ TEST(Engine, TinyWriteReadPreservesKnownBytes) {
 
   iobench::Config config;
   config.file = path;
-  config.file_size = 4 * 4096;
+  config.file_size = 4ULL * 4096;
   config.operations = 4;
   config.warmup = std::chrono::milliseconds(1);
   config.operation = iobench::Operation::Write;
@@ -94,14 +87,13 @@ TEST(Engine, TinyWriteReadPreservesKnownBytes) {
   std::vector<double> latencies;
   for (const auto& sample : read.samples) {
     EXPECT_GE(sample.latency_ns, 0);
-    latencies.push_back(sample.latency_ns / 1000.0);
+    latencies.push_back(static_cast<double>(sample.latency_ns) / 1000.0);
   }
-  const auto stats = iobench::SummarizeRun(latencies, config.block_size,
-                                           read.elapsed_ns / 1e9);
+  const auto stats = iobench::Summarize(
+      std::move(latencies), config.block_size, std::chrono::nanoseconds(read.elapsed_ns));
   EXPECT_GT(stats.iops, 0);
-  EXPECT_LE(stats.latency.min_us, stats.latency.p50_us);
-  EXPECT_LE(stats.latency.p50_us, stats.latency.p99_us);
-  EXPECT_LE(stats.latency.p99_us, stats.latency.max_us);
+  EXPECT_LE(stats.min_us, stats.p99_us);
+  EXPECT_LE(stats.p99_us, stats.max_us);
   std::ifstream input(path, std::ios::binary);
   const std::string bytes((std::istreambuf_iterator<char>(input)), {});
   EXPECT_EQ(bytes, std::string(config.file_size, '\x5a'));

@@ -6,7 +6,7 @@
 
 namespace iobench {
 
-enum class Pattern { Sequential, Random };
+enum class Pattern : std::uint8_t { Sequential, Random };
 
 class Offsets {
  public:

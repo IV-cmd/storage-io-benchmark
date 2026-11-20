@@ -6,6 +6,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "bench/engine.h"
@@ -17,38 +18,25 @@ std::uint64_t Number(std::string_view value, std::uint64_t scale = 1) {
   std::uint64_t number = 0;
   const auto [end, error] =
       std::from_chars(value.data(), value.data() + value.size(), number);
-  if (value.empty() || error != std::errc{} ||
-      end != value.data() + value.size() ||
-      number >
-          static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()) /
-              scale) {
+  const auto limit = std::numeric_limits<std::int64_t>::max();
+  if (error != std::errc{} || end != value.data() + value.size() ||
+      number > limit / scale) {
     throw std::invalid_argument("invalid or overflowing numeric value");
   }
   return number * scale;
 }
 
 std::uint64_t Bytes(std::string_view value) {
-  std::uint64_t scale = 1;
-  if (!value.empty()) {
-    switch (value.back()) {
-      case 'k':
-      case 'K':
-        scale = 1024;
-        break;
-      case 'm':
-      case 'M':
-        scale = 1024 * 1024;
-        break;
-      case 'g':
-      case 'G':
-        scale = 1024 * 1024 * 1024;
-        break;
-      default:
-        return Number(value);
-    }
-    value.remove_suffix(1);
+  if (value.ends_with('k') || value.ends_with('K')) {
+    return Number(value.substr(0, value.size() - 1), 1024);
   }
-  return Number(value, scale);
+  if (value.ends_with('m') || value.ends_with('M')) {
+    return Number(value.substr(0, value.size() - 1), 1024ULL * 1024);
+  }
+  if (value.ends_with('g') || value.ends_with('G')) {
+    return Number(value.substr(0, value.size() - 1), 1024ULL * 1024 * 1024);
+  }
+  return Number(value);
 }
 
 std::chrono::nanoseconds Duration(std::string_view value) {
@@ -66,11 +54,10 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
   std::vector<double> latencies;
   latencies.reserve(result.samples.size());
   for (const auto& sample : result.samples) {
-    latencies.push_back(sample.latency_ns / 1000.0);
+    latencies.push_back(static_cast<double>(sample.latency_ns) / 1000.0);
   }
-  const auto stats =
-      iobench::SummarizeRun(latencies, c.block_size, result.elapsed_ns / 1e9);
-  const auto& l = stats.latency;
+  const auto elapsed = std::chrono::nanoseconds(result.elapsed_ns);
+  const auto stats = iobench::Summarize(std::move(latencies), c.block_size, elapsed);
   const auto op = c.operation == iobench::Operation::Read ? "read" : "write";
   const auto pattern =
       c.pattern == iobench::Pattern::Sequential ? "seq" : "rand";
@@ -94,9 +81,9 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
     std::cout << ",,," << result.samples.size() << ','
               << result.samples.size() * c.block_size << ','
               << result.elapsed_ns << ',' << stats.mib_per_second << ','
-              << stats.iops << ',' << l.min_us << ',' << l.mean_us << ','
-              << l.p50_us << ',' << l.p95_us << ',' << l.p99_us << ','
-              << l.max_us << '\n';
+              << stats.iops << ',' << stats.min_us << ',' << stats.mean_us << ','
+              << stats.p50_us << ',' << stats.p95_us << ',' << stats.p99_us << ','
+              << stats.max_us << '\n';
     return;
   }
   std::cout
@@ -105,11 +92,11 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
       << " file_size=" << c.file_size << " warmup_ns=" << c.warmup.count()
       << '\n'
       << "operations=" << result.samples.size()
-      << " elapsed_s=" << result.elapsed_ns / 1e9
+      << " elapsed_s=" << std::chrono::duration<double>(elapsed).count()
       << " MiB/s=" << stats.mib_per_second << " IOPS=" << stats.iops << '\n'
       << "latency_us  min       mean      p50       p95       p99       max\n"
-      << "            " << l.min_us << "  " << l.mean_us << "  " << l.p50_us
-      << "  " << l.p95_us << "  " << l.p99_us << "  " << l.max_us << '\n';
+      << "            " << stats.min_us << "  " << stats.mean_us << "  " << stats.p50_us
+      << "  " << stats.p95_us << "  " << stats.p99_us << "  " << stats.max_us << '\n';
 }
 
 }  // namespace

@@ -10,7 +10,7 @@
 
 namespace iobench {
 
-enum class Operation { Read, Write };
+enum class Operation : std::uint8_t { Read, Write };
 
 struct Config {
   std::string file;
@@ -36,7 +36,7 @@ struct Result {
 class Engine {
  public:
   explicit Engine(Config config) : config_(std::move(config)) {}
-  Result Run() const;
+  [[nodiscard]] Result Run() const;
 
  private:
   Config config_;
