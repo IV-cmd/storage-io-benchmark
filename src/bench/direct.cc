@@ -46,8 +46,8 @@ Alignment DirectAlignment(int fd) {
   if (logical == 0) {
     throw std::runtime_error("cannot query backing device logical block size");
   }
-  return {info.stx_dio_mem_align, std::lcm(logical, info.stx_dio_offset_align),
-          logical};
+  return {std::lcm(logical, info.stx_dio_mem_align),
+          std::lcm(logical, info.stx_dio_offset_align), logical};
 }
 
 void CheckAlignment(const void* buffer, std::uint64_t offset,
