@@ -23,7 +23,42 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++ cmake ninja-build clang-18 clang-format-18 clang-tidy-18
+          sudo apt-get install -y g++ cmake ninja-build clang-18 clang-format-18 clang-tidy-18 liburing-dev sysstat
+      - name: Record storage and ring capabilities
+        run: |
+          mkdir -p results
+          cat > "$RUNNER_TEMP/storage-probe.cc" <<'CPP'
+          #include <liburing.h>
+          #include <fcntl.h>
+          #include <sys/stat.h>
+          #include <unistd.h>
+          #include <cerrno>
+          #include <cstring>
+          #include <iostream>
+          int main(int argc, char** argv) {
+            io_uring ring{};
+            const int rc = io_uring_queue_init(32, &ring, 0);
+            std::cout << "io_uring_queue_init=" << rc << '\n';
+            if (rc == 0) io_uring_queue_exit(&ring);
+            for (int i = 1; i < argc; ++i) {
+              const int fd = open(argv[i], O_RDWR | O_CREAT | O_EXCL | O_DIRECT, 0600);
+              const int error = fd < 0 ? errno : 0;
+              std::cout << argv[i] << " O_DIRECT open errno=" << error
+                        << " (" << std::strerror(error) << ")\n";
+              if (fd < 0) continue;
+              struct statx info{};
+              const int status = statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &info);
+              std::cout << "statx=" << status << " mask=" << info.stx_mask
+                        << " memory_alignment=" << info.stx_dio_mem_align
+                        << " offset_alignment=" << info.stx_dio_offset_align << '\n';
+              close(fd);
+              unlink(argv[i]);
+            }
+          }
+          CPP
+          g++ -std=c++20 "$RUNNER_TEMP/storage-probe.cc" -luring -o "$RUNNER_TEMP/storage-probe"
+          "$RUNNER_TEMP/storage-probe" "$RUNNER_TEMP/iobench-probe" /dev/shm/iobench-probe | tee results/host-probe.txt
+          lsblk -o NAME,TYPE,SIZE,LOG-SEC,PHY-SEC,ROTA,MODEL >> results/host-probe.txt
       - name: Build
         run: make build
       - name: Check formatting
