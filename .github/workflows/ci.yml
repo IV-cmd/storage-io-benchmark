@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      sources:
+        description: Optional JSON map of proposed C++ files; format and verify without committing
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -24,6 +29,31 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y g++ cmake ninja-build clang-18 clang-format-18 clang-tidy-18 liburing-dev sysstat
+      - name: Format proposed C++ edits
+        if: inputs.sources != ''
+        env:
+          SOURCES: ${{ inputs.sources }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os, re
+          from pathlib import Path
+          for name, content in json.loads(os.environ["SOURCES"]).items():
+              path = Path(name)
+              assert ".." not in path.parts
+              assert name == "CMakeLists.txt" or re.fullmatch(r"(?:src|tests)/[a-zA-Z0-9_./-]+\.(?:cc|h)", name)
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text(content)
+          PYTHON
+          make format
+      - name: Upload formatted candidate for committing after checks pass
+        if: inputs.sources != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatted-candidate
+          path: |
+            src/
+            tests/
+            CMakeLists.txt
       - name: Record storage and ring capabilities
         run: |
           mkdir -p results
