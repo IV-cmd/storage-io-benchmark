@@ -40,7 +40,9 @@ with tempfile.TemporaryDirectory(dir=sys.argv[2]) as directory:
     with (output / "device.txt").open("w") as stream:
         stream.write(f"device={device}\npage_size={os.sysconf('SC_PAGESIZE')}\n")
         for name in ["logical_block_size", "physical_block_size", "scheduler", "rotational"]:
-            stream.write(f"{name}={(queue / name).read_text().strip()}\n")
+            attribute = queue / name
+            value = attribute.read_text().strip() if attribute.exists() else "not exposed at this device layer"
+            stream.write(f"{name}={value}\n")
 
     def evict():
         with target.open("r+b") as stream:
