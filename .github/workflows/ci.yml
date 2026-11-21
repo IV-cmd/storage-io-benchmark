@@ -24,7 +24,8 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++ cmake ninja-build clang-18 clang-format-18 clang-tidy-18 liburing-dev sysstat
+          sudo apt-get install -y g++ cmake ninja-build clang-18 clang-format-18 clang-tidy-18 liburing-dev sysstat fio blktrace
+          sudo apt-get install -y linux-tools-$(uname -r) || true
       - name: Format proposed C++ edits
         if: inputs.sources != ''
         env:
@@ -110,6 +111,11 @@ jobs:
           LC_ALL: C
           TZ: UTC
         run: python3 scripts/observe_storage.py ./build-release/iobench "$RUNNER_TEMP"
+      - name: Cross-check iobench against fio (deltas recorded, not gated)
+        run: python3 scripts/validate_fio.py ./build-release/iobench "$RUNNER_TEMP" --duration 2 --repeats 1
+        continue-on-error: true
+      - name: Capture iostat, blktrace and perf alongside runs
+        run: python3 scripts/observe_run.py ./build-release/iobench "$RUNNER_TEMP" --duration 2
       - name: Upload verification evidence
         if: always()
         uses: actions/upload-artifact@v4
