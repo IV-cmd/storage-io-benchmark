@@ -9,6 +9,13 @@ sudo apt-get update
 sudo apt-get install -y git make g++ cmake ninja-build clang-18 clang-format-18 clang-tidy-18 liburing-dev sysstat util-linux
 ```
 
+`make validate` and `make observe` additionally need `fio`, `blktrace`
+(also provides `blkparse`/`btt`), and a `perf` matching the running kernel:
+
+```sh
+sudo apt-get install -y fio blktrace linux-tools-$(uname -r)
+```
+
 From a fresh clone, `make build` configures and builds the project in one
 command. The first configuration fetches GoogleTest v1.15.2, so it needs network
 access. The wrapper uses these CMake/Ninja commands:
@@ -74,12 +81,34 @@ not validated storage performance.
 Liburing headers/library are required for every build. Cache observations also
 use Python 3, `iostat` (`sysstat`), and `fincore` (`util-linux`). CI installs
 liburing/sysstat and uses the runner's Python/util-linux. No sanitizer
-suppressions are needed. Later analysis needs `fio`, a kernel-compatible `perf`,
-`blktrace`/`blkparse`, and pandas/matplotlib; those are not part of these checks.
+suppressions are needed. Plotting (pandas/matplotlib) is not part of these checks.
 
 For GitHub-only editing, manual CI accepts an optional `sources` JSON map of
 proposed C++ files. Actions formats/checks those files without committing; after
 the run passes, `formatted-candidate` contains the exact formatted sources.
 Normal push/manual runs do not automatically cancel one another.
+
+## fio validation and I/O-path observation
+
+Both targets build `build-release/` and need an existing directory on the
+block-backed filesystem under test. They create and delete a 1 GiB scratch file
+and write a timestamped bundle under gitignored `results/`. Re-running is safe.
+
+```sh
+make validate SCRATCH=/mnt/test/scratch   # iobench vs fio; ~30 minutes by default
+make observe SCRATCH=/mnt/test/scratch    # iostat + blktrace/btt + perf stat
+```
+
+Linux-only dependencies and permissions, all optional for `make observe`
+(missing ones are recorded as `unavailable: <reason>` instead of failing):
+
+| Tool | Package | Requirement |
+|---|---|---|
+| `iostat` | sysstat | Unprivileged; device names follow the kernel (`vda`, `nvme0n1`, `dm-0`). |
+| `blktrace`, `blkparse`, `btt` | blktrace | Root or `CAP_SYS_ADMIN`, plus debugfs at `/sys/kernel/debug`. Run as root or allow passwordless `sudo`; the script uses `sudo -n` and never prompts. |
+| `perf stat` | linux-tools for the running kernel | `kernel.perf_event_paranoid` <= 2 for your own process (Ubuntu defaults to 4), or root. Temporarily: `sudo sysctl kernel.perf_event_paranoid=1`. VMs may report hardware counters as `<not supported>`. |
+
+Traces are written to `/dev/shm` so trace files do not add I/O to the traced
+disk. See [validation](validation.md) for tolerances and observed deltas.
 
 See [direct-I/O caveats](caveats.md) and [observation reproduction](cache-bypass.md).
