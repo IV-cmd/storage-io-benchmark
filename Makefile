@@ -34,3 +34,7 @@ test-asan:
 validate: release
 	@test -n "$(SCRATCH)" || { echo "usage: make validate SCRATCH=/existing/dir/on/tested/filesystem"; exit 2; }
 	python3 scripts/validate_fio.py $(RELEASE_DIR)/iobench $(SCRATCH)
+
+observe: release
+	@test -n "$(SCRATCH)" || { echo "usage: make observe SCRATCH=/existing/dir/on/tested/filesystem"; exit 2; }
+	python3 scripts/observe_run.py $(RELEASE_DIR)/iobench $(SCRATCH)
