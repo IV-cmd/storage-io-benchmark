@@ -83,8 +83,9 @@ def blktrace(folder, disk):
             stop(process)
         with text.open("w") as stream:
             subprocess.run(SUDO + ["blkparse", "-i", "trace", "-D", trace, "-d", f"{trace}/trace.bin"], stdout=stream, check=True)
+        # btt also writes <dev>_iops_fp.dat dumps; keep them inside the temp dir.
         with (folder / "btt.txt").open("w") as stream:
-            subprocess.run(["btt", "-i", f"{trace}/trace.bin"], stdout=stream, check=True)
+            subprocess.run(["btt", "-i", f"{trace}/trace.bin"], stdout=stream, cwd=trace, check=True)
 
 
 def evict(target):
