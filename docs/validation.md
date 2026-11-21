@@ -44,6 +44,15 @@ accounting overhead at microsecond latencies); O_DIRECT reads trend slightly
 low for the same reason reversed — fio's submission path is leaner when I/O
 latency dominates. The io_uring cell is within noise.
 
+The same script run in CI (Actions run
+[44942375287](https://github.com/IV-cmd/storage-io-benchmark/actions/runs/44942375287),
+2-second single pairs) reproduced the pattern: buffered 4k cells +12.5%/+12.3%
+— above tolerance — while all O_DIRECT and io_uring cells matched within
+1.0%. The direction is consistent: at sub-microsecond per-op buffered reads
+the tool wins because fio's per-I/O accounting costs more of each
+microsecond; at device-bound latencies the implementations agree. CI records
+the comparison without gating on it.
+
 ## Scope
 
 Writes are excluded: the tool's per-op latencies only cover what it measures,
