@@ -61,3 +61,55 @@ No fio, perf/blktrace, plots, fault injection, or physical-media validation yet.
 1. Why did successful O_DIRECT open on tmpfs prove nothing about bypass?
 2. What breaks if a buffer is reused before its completion arrives?
 3. Why can a lost completion make throughput look plausible, and what invariant prevents it?
+
+## fio validation and trace instrumentation (M3)
+
+### What changed
+
+`make validate` (`scripts/validate_fio.py`) runs six read cells through both
+iobench and fio 3.28 — three alternated pairs, medians compared, `results/`
+holds raw CSV/JSON. `make observe` (`scripts/observe_run.py`) wraps three
+workloads with `iostat -dxy` on the backing disk, `blktrace` + `btt` written to
+`/dev/shm`, and `perf stat`; missing tools or permissions are recorded as
+`unavailable: <reason>` instead of failing. Tolerance is 10% throughput,
+fixed before the first run; latency is reported, not gated.
+
+### What broke, and what fixed it
+
+| Finding | Correction / lesson |
+|---|---|
+| Send `SIGINT` to `sudo blktrace` to stop it — the script hung 7 minutes; sudo did not relay the signal and blktrace kept tracing. | Give `blktrace -w <seconds>` so it exits by itself; monitor shutdown now escalates SIGINT → SIGTERM → SIGKILL with timeouts. A signal sent to a launcher is not a signal sent to the tool. |
+| Ubuntu 22.04 kernel headers predate `statx` DIO fields; the release build failed on this VM though CI is fine on ubuntu-latest. | Built with Linux 6.8 UAPI headers plus liburing 2.5 built from source in `~/liburing`; the compiled binary is normal and this is a dev-environment detail, not a code fix. |
+| Block devices report `major 0` on virtual filesystems — the tool rejected tmpfs/OverlayFS anyway; observe script also resolves the backing disk via `/sys/dev/block`. | Reused the same resolution; partitions map to their parent disk (`vda` for `vda1`). |
+| Running both tools niced (background job) still produced clean medians. | Noise affects both tools symmetrically; alternating order matters more than niceness for a delta comparison. |
+
+### Observed deltas (AWS VM, ext4 on virtio vda, 1 GiB file, 5s+1s, 3 repeats)
+
+All six cells passed: buffered seq/rand 4k +5.9%/+7.4%, O_DIRECT seq/rand 4k
+−2.6%/−7.2%, O_DIRECT rand 64k −0.4%, io_uring depth-32 rand 4k −0.4%.
+Buffered cells trend a few percent high (fio's per-op accounting at µs
+latencies); O_DIRECT trends slightly low. Full table and method mapping in
+[docs/validation.md](docs/validation.md). The earlier smoke run at 1-second
+durations showed ±20–40% swings purely from short-window VM noise — evidence
+for keeping the gate at medians of alternated pairs, not single runs.
+
+### Traces confirmed the block-layer story
+
+`btt` on the io_uring depth-32 run shows ~460k I/Os, Q2G ~0.26µs avg, D2C
+~143µs avg — nearly all time is device latency, not queueing overhead. `perf
+stat` on O_DIRECT rand 4k shows ~165k context switches/sec (one per ~6µs
+synchronous read) vs ~30/sec for a warm buffered run; hardware counters are
+`<not supported>` on this hypervisor, so instructions/cycles are absent.
+
+### Limits to explain back
+
+The 10% tolerance was fixed before measuring, but validation is read-only and
+single-host: nothing is proven about writes, other kernels, or other hardware.
+fio's batched io_uring submission and histogram percentiles are not identical
+measurements — agreement on throughput is the contract, not identical latency
+shapes. Trace capture itself perturbs the run (blktrace adds per-I/O work and
+iostat reads sysfs), so observed magnitudes are context, not isolation.
+
+1. fio `--iodepth=32` submits SQEs in batches while iobench submits one per reaped CQE — why does throughput still match, and which path would divergence show up in first?
+2. Why does `Q2G` near-zero with `D2C` dominant tell you the kernel is not the bottleneck — and what would large `Q2G` mean instead?
+3. perf shows ~165k context switches/sec for sync rand-4k but ~30/sec for buffered seq-64k. Explain both numbers from what each engine does per I/O.
