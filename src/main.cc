@@ -91,7 +91,7 @@ void Print(const iobench::Config& c, const iobench::Result& result, bool csv) {
     return;
   }
   std::cout
-      << "No fsync; unvalidated against fio.\n"
+      << "No fsync; reads cross-checked vs fio.\n"
       << "engine=" << c.engine << " iodepth=" << c.iodepth << '\n'
       << "op=" << op << " pattern=" << pattern << " block_size=" << c.block_size
       << " file_size=" << c.file_size << " warmup_ns=" << c.warmup.count()
@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 WARNING: use disposable regular files only. Writes overwrite their contents.
 Read setup creates/extends files and populates new bytes before timing.
 One userspace thread; O_DIRECT needs a supported block-backed filesystem.
-No durability or fio validation.
+No durability; writes unvalidated against fio.
 )";
         return 0;
       }

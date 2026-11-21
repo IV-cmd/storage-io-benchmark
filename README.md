@@ -5,9 +5,9 @@
 A standalone C++20/Linux learning project comparing buffered `pread`/`pwrite`,
 `O_DIRECT`, and direct `io_uring` workloads. It reports per-operation latencies,
 percentiles, throughput, and IOPS for sequential/random reads and writes.
-**Not yet validated against fio:** exploratory observations are not trusted
-storage-performance results or SSD/HDD comparisons. Kernel-side profiling and
-plots are not implemented.
+Read workloads are cross-validated against fio within a documented tolerance
+(see [validation](docs/validation.md)); writes are not yet cross-validated.
+`iostat`, `blktrace`/`btt`, and `perf stat` capture is implemented; plots are not.
 
 ## Engines
 
@@ -32,6 +32,9 @@ Install the prerequisites in the [setup guide](docs/setup.md), then:
 make build
 ./build/iobench --help
 make test
+make release                    # optimized binary for measurements
+make validate SCRATCH=/mnt/test # side-by-side iobench vs fio deltas
+make observe SCRATCH=/mnt/test  # iostat + blktrace/btt + perf stat bundle
 ```
 
 Use a release build, without sanitizers, for workload observations:
@@ -114,6 +117,7 @@ check written bytes. Separate scripts collect exploratory cache/depth evidence;
 performance differences are not CI pass thresholds.
 
 See the [cache-bypass observation](docs/cache-bypass.md) for actual iostat and
-file-residency evidence, and [learning notes](LEARNING_LOG.md) for failures and
+file-residency evidence, [validation](docs/validation.md) for fio agreement and expected deltas,
+and [learning notes](LEARNING_LOG.md) for failures and
 limits. No fio comparison, perf/blktrace analysis, plotting, or coverage gate is
 included. MIT licensed; see [LICENSE](LICENSE).
