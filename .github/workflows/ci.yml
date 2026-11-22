@@ -112,8 +112,15 @@ jobs:
           TZ: UTC
         run: python3 scripts/observe_storage.py ./build-release/iobench "$RUNNER_TEMP"
       - name: Cross-check iobench against fio (deltas recorded, not gated)
-        run: python3 scripts/validate_fio.py ./build-release/iobench "$RUNNER_TEMP" --duration 2 --repeats 1
-        continue-on-error: true
+        run: |
+          status=0
+          python3 scripts/validate_fio.py ./build-release/iobench "$RUNNER_TEMP" --duration 2 --repeats 1 || status=$?
+          cat results/validate-*/comparison.md >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" -eq 3 ]; then
+            echo "::warning::fio throughput tolerance missed; see the comparison and evidence artifact"
+          elif [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
       - name: Capture iostat, blktrace and perf alongside runs
         run: python3 scripts/observe_run.py ./build-release/iobench "$RUNNER_TEMP" --duration 2
       - name: Upload verification evidence
