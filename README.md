@@ -5,8 +5,10 @@
 A standalone C++20/Linux learning project comparing buffered `pread`/`pwrite`,
 `O_DIRECT`, and direct `io_uring` workloads. It reports per-operation latencies,
 percentiles, throughput, and IOPS for sequential/random reads and writes.
-Read workloads are cross-validated against fio within a documented tolerance
-(see [validation](docs/validation.md)); writes are not yet cross-validated.
+Read workloads are compared with fio at a fixed 10% throughput tolerance.
+The published repeated run passes four of six cells; buffered 4 KiB reads remain
+outside tolerance (see [validation](docs/validation.md)). Writes are not yet
+cross-validated.
 `iostat`, `blktrace`/`btt`, and `perf stat` capture is implemented; plots are not.
 
 ## Engines
@@ -114,10 +116,11 @@ queues. There is no per-operation runtime checksum. CI checks build, formatting,
 clang-tidy, and tests under ASan/UBSan without suppressions. Release checks run
 all engines over both patterns/operations and three block sizes, parse CSV, and
 check written bytes. Separate scripts collect exploratory cache/depth evidence;
-performance differences are not CI pass thresholds.
+main CI records fio tolerance misses as warnings, while the dedicated repeated
+validation workflow fails on them.
 
-See the [cache-bypass observation](docs/cache-bypass.md) for actual iostat and
-file-residency evidence, [validation](docs/validation.md) for fio agreement and expected deltas,
-and [learning notes](LEARNING_LOG.md) for failures and
-limits. No fio comparison, perf/blktrace analysis, plotting, or coverage gate is
-included. MIT licensed; see [LICENSE](LICENSE).
+See the [cache-bypass observation](docs/cache-bypass.md) for iostat and
+file-residency evidence, [validation](docs/validation.md) for fio settings,
+measured misses, and profiling scope, and [learning notes](LEARNING_LOG.md) for
+failures and limits. No plots or coverage gate are included.
+MIT licensed; see [LICENSE](LICENSE).

@@ -56,60 +56,66 @@ this implementation chooses direct mode. A slot cannot be reused until its CQE
 is consumed, and completion order need not match submission order. Reported
 latency includes queueing and userspace reaping delay. Schema 2 records engine,
 depth, and summary accounting; old schema-1 datasets must be handled explicitly.
-No fio, perf/blktrace, plots, fault injection, or physical-media validation yet.
+This stage did not yet include fio or perf/blktrace; see the next section for
+those additions. Plots, fault injection, and physical-media validation remain
+outside the implemented scope.
 
 1. Why did successful O_DIRECT open on tmpfs prove nothing about bypass?
 2. What breaks if a buffer is reused before its completion arrives?
 3. Why can a lost completion make throughput look plausible, and what invariant prevents it?
 
-## fio validation and trace instrumentation (M3)
+## fio comparisons and path instrumentation
 
 ### What changed
 
-`make validate` (`scripts/validate_fio.py`) runs six read cells through both
-iobench and fio 3.28 — three alternated pairs, medians compared, `results/`
-holds raw CSV/JSON. `make observe` (`scripts/observe_run.py`) wraps three
-workloads with `iostat -dxy` on the backing disk, `blktrace` + `btt` written to
-`/dev/shm`, and `perf stat`; missing tools or permissions are recorded as
-`unavailable: <reason>` instead of failing. Tolerance is 10% throughput,
-fixed before the first run; latency is reported, not gated.
+`make validate` compares six read cells with fio, using three alternating pairs
+and median throughput. The 10% tolerance is unchanged. Each bundle records its
+commit, settings, environment, exact commands, and raw CSV/JSON. The manual
+[repeated workflow](https://github.com/IV-cmd/storage-io-benchmark/actions/workflows/validate.yml)
+publishes evidence even when the comparison fails.
+
+`make observe` captures `iostat`, `blktrace`/`btt`, and four explicit perf
+software events. Capture uses `/dev/shm`; results reach the measured filesystem
+only after monitors stop. Missing tools/permissions remain explicit rather
+than invented measurements.
 
 ### What broke, and what fixed it
 
 | Finding | Correction / lesson |
 |---|---|
-| Send `SIGINT` to `sudo blktrace` to stop it — the script hung 7 minutes; sudo did not relay the signal and blktrace kept tracing. | Give `blktrace -w <seconds>` so it exits by itself; monitor shutdown now escalates SIGINT → SIGTERM → SIGKILL with timeouts. A signal sent to a launcher is not a signal sent to the tool. |
-| Ubuntu 22.04 kernel headers predate `statx` DIO fields; the release build failed on this VM though CI is fine on ubuntu-latest. | Built with Linux 6.8 UAPI headers plus liburing 2.5 built from source in `~/liburing`; the compiled binary is normal and this is a dev-environment detail, not a code fix. |
-| Block devices report `major 0` on virtual filesystems — the tool rejected tmpfs/OverlayFS anyway; observe script also resolves the backing disk via `/sys/dev/block`. | Reused the same resolution; partitions map to their parent disk (`vda` for `vda1`). |
-| Running both tools niced (background job) still produced clean medians. | Noise affects both tools symmetrically; alternating order matters more than niceness for a delta comparison. |
+| Green main CI concealed fio tolerance misses behind `continue-on-error`. | Exit 3 identifies a tolerance miss; main CI warns and publishes it, while other errors fail. The repeated workflow fails on misses. |
+| The earlier AWS all-pass table referenced only a VM directory. | Replaced the published baseline with a GitHub run whose raw files, commands, commit, and environment can be inspected. |
+| fio was described as submitting larger batches without setting that option. | Set submission/completion batches explicitly to one; matching depth does not make implementations identical. |
+| Default perf events were unsupported and did not establish context-switch counts. | Request task-clock, context-switches, cpu-migrations, and page-faults explicitly; probe support before collecting. |
+| The runner's unprivileged perf probe was blocked by `perf_event_paranoid=4`. | Collect as root on the disposable CI runner, record UID, and leave kernel policy unchanged. Other hosts can still report unavailable. |
+| Root collection copied private temporary-directory permissions into artifacts, blocking upload. | Restore runner ownership on step exit, including failure, before the artifact action reads results. |
+| Small Q2G and dominant D2C were interpreted as proving a device bottleneck. | Q2G covers allocation only; D2C includes driver/device work. Neither rules out other kernel costs or isolates physical-media latency. |
+| Timing differences were attributed to fio overhead or VM noise without a controlled experiment. | Keep those as hypotheses. Repeated buffered misses remain unresolved, not explained away. |
 
-### Observed deltas (AWS VM, ext4 on virtio vda, 1 GiB file, 5s+1s, 3 repeats)
+### What actually ran
 
-All six cells passed: buffered seq/rand 4k +5.9%/+7.4%, O_DIRECT seq/rand 4k
-−2.6%/−7.2%, O_DIRECT rand 64k −0.4%, io_uring depth-32 rand 4k −0.4%.
-Buffered cells trend a few percent high (fio's per-op accounting at µs
-latencies); O_DIRECT trends slightly low. Full table and method mapping in
-[docs/validation.md](docs/validation.md). The earlier smoke run at 1-second
-durations showed ±20–40% swings purely from short-window VM noise — evidence
-for keeping the gate at medians of alternated pairs, not single runs.
+[Repeated run 45015819653](https://github.com/IV-cmd/storage-io-benchmark/actions/runs/45015819653)
+used Linux 7.0.0-1020-azure, fio 3.41, ext4 on virtual `sda1`, a populated 1 GiB
+file, five-second measurements, one-second warmups, and three alternating pairs.
+Four direct-I/O cells pass; buffered sequential/random 4 KiB reads miss by
++23.3%/+20.5%. Exit 3 correctly makes that workflow red. The comparison was
+recalculated from the raw repeats, including completed/submitted operation
+counts. Full results and commands are linked from [validation](docs/validation.md).
 
-### Traces confirmed the block-layer story
-
-`btt` on the io_uring depth-32 run shows ~460k I/Os, Q2G ~0.26µs avg, D2C
-~143µs avg — nearly all time is device latency, not queueing overhead. `perf
-stat` on O_DIRECT rand 4k shows ~165k context switches/sec (one per ~6µs
-synchronous read) vs ~30/sec for a warm buffered run; hardware counters are
-`<not supported>` on this hypervisor, so instructions/cycles are absent.
+[Observation run 45017058458](https://github.com/IV-cmd/storage-io-benchmark/actions/runs/45017058458)
+published all four perf software counters for all three observation workloads.
+These are whole-process totals, including warmup and output; they must not be
+divided by only the measured duration. Block traces include all device traffic,
+including unrelated processes. No per-engine context-switch rate or isolated
+device-service-time claim is made from these captures.
 
 ### Limits to explain back
 
-The 10% tolerance was fixed before measuring, but validation is read-only and
-single-host: nothing is proven about writes, other kernels, or other hardware.
-fio's batched io_uring submission and histogram percentiles are not identical
-measurements — agreement on throughput is the contract, not identical latency
-shapes. Trace capture itself perturbs the run (blktrace adds per-I/O work and
-iostat reads sysfs), so observed magnitudes are context, not isolation.
+The implementation and evidence collection exist, but all-six-cell fio
+agreement is not established. Writes, other kernels/filesystems, durability,
+and physical-media properties are not validated. Trace instrumentation changes
+the workload, and matching random distributions does not mean matching offsets.
 
-1. fio `--iodepth=32` submits SQEs in batches while iobench submits one per reaped CQE — why does throughput still match, and which path would divergence show up in first?
-2. Why does `Q2G` near-zero with `D2C` dominant tell you the kernel is not the bottleneck — and what would large `Q2G` mean instead?
-3. perf shows ~165k context switches/sec for sync rand-4k but ~30/sec for buffered seq-64k. Explain both numbers from what each engine does per I/O.
+1. Why can main CI be green while the repeated fio workflow correctly fails?
+2. Why does near-zero Q2G not prove the kernel has no other bottleneck?
+3. Why would dividing whole-process context switches by the two-second measured window be misleading?

@@ -95,7 +95,7 @@ block-backed filesystem under test. They create and delete a 1 GiB scratch file
 and write a timestamped bundle under gitignored `results/`. Re-running is safe.
 
 ```sh
-make validate SCRATCH=/mnt/test/scratch   # iobench vs fio; ~30 minutes by default
+make validate SCRATCH=/mnt/test/scratch   # six read cells, three pairs each
 make observe SCRATCH=/mnt/test/scratch    # iostat + blktrace/btt + perf stat
 ```
 
@@ -106,9 +106,18 @@ Linux-only dependencies and permissions, all optional for `make observe`
 |---|---|---|
 | `iostat` | sysstat | Unprivileged; device names follow the kernel (`vda`, `nvme0n1`, `dm-0`). |
 | `blktrace`, `blkparse`, `btt` | blktrace | Root or `CAP_SYS_ADMIN`, plus debugfs at `/sys/kernel/debug`. Run as root or allow passwordless `sudo`; the script uses `sudo -n` and never prompts. |
-| `perf stat` | linux-tools for the running kernel | `kernel.perf_event_paranoid` <= 2 for your own process (Ubuntu defaults to 4), or root. Temporarily: `sudo sysctl kernel.perf_event_paranoid=1`. VMs may report hardware counters as `<not supported>`. |
+| `perf stat` | linux-tools for the running kernel | Requires permission under the host's `perf_event_paranoid`/capability policy, or root. The script probes explicit software events and records blocked or unsupported capture as unavailable. |
 
-Traces are written to `/dev/shm` so trace files do not add I/O to the traced
-disk. See [validation](validation.md) for tolerances and observed deltas.
+CI runs the observer as root on its disposable runner, records the collector
+UID, and restores runner ownership before artifact upload. It does not change
+`perf_event_paranoid`. Other hosts retain their policy and may record perf as
+unavailable; do not relax production security policy for this experiment.
+
+All captured output is staged in `/dev/shm`, then copied to `results/` only
+after monitors stop, avoiding trace-output I/O on the measured device. Perf
+covers the whole benchmark process, not just its measured window. Block traces
+cover the entire device, including unrelated processes. See
+[validation](validation.md) for exact scope, tolerances, published results, and
+GitHub's manual repeated-validation workflow.
 
 See [direct-I/O caveats](caveats.md) and [observation reproduction](cache-bypass.md).
