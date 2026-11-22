@@ -17,6 +17,7 @@ WORKLOADS = {
     "iouring-32-rand-4k": ["--engine", "iouring", "--iodepth", "32", "--pattern", "rand", "--block-size", "4k"],
 }
 SUDO = [] if os.geteuid() == 0 else ["sudo", "-n"]
+PERF_EVENTS = "task-clock,context-switches,cpu-migrations,page-faults"
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("binary", type=Path, help="release iobench binary")
@@ -64,8 +65,9 @@ def iostat(path, disk):
 @contextmanager
 def blktrace(folder, disk):
     text = folder / "blktrace.txt"
-    if not shutil.which("blktrace"):
-        text.write_text("unavailable: blktrace is not installed\n")
+    missing = [name for name in ("blktrace", "blkparse", "btt") if not shutil.which(name)]
+    if missing:
+        text.write_text("unavailable: missing " + ", ".join(missing) + "\n")
         yield
         return
     # Traces go to tmpfs so writing them does not add I/O to the traced disk.
@@ -97,15 +99,21 @@ def evict(target):
 def environment(scratch, disk, perf):
     commands = [["uname", "-a"], ["findmnt", "-T", str(scratch), "-o", "SOURCE,FSTYPE,OPTIONS"],
                 ["lsblk", "-o", "NAME,TYPE,SIZE,LOG-SEC,PHY-SEC,ROTA,MODEL"]]
-    lines = [f"disk={disk}", f"perf_stat={'available' if perf else 'unavailable'}"]
+    lines = [f"disk={disk}", f"perf_stat={'available' if perf else 'unavailable'}", f"perf_events={PERF_EVENTS}",
+             "profile_scope=whole process: setup, warmup, measurement, statistics and CSV formatting",
+             "block_scope=whole device, including unrelated processes",
+             "output_capture=tmpfs; copied to results only after all monitors stop"]
     scheduler = Path(f"/sys/block/{disk}/queue/scheduler")
     lines.append(f"scheduler={scheduler.read_text().strip() if scheduler.exists() else 'not exposed'}")
     lines += [subprocess.run(command, capture_output=True, text=True).stdout for command in commands]
     return "\n".join(lines)
 
 
-perf_ok = shutil.which("perf") is not None and subprocess.run(
-    ["perf", "stat", "-o", os.devnull, "--", "true"], capture_output=True).returncode == 0
+probe = subprocess.run(["perf", "stat", "-e", PERF_EVENTS, "--", "true"], capture_output=True, text=True,
+                       env={**os.environ, "LC_ALL": "C"}) if shutil.which("perf") else None
+perf_ok = probe is not None and probe.returncode == 0 and not any(
+    marker in probe.stderr for marker in ("<not supported>", "<not counted>"))
+perf_reason = probe.stderr.strip() if probe is not None else "perf is not installed"
 with tempfile.TemporaryDirectory(dir=args.scratch) as directory:
     target = Path(directory) / "observe.data"
     common = [binary, "--file", str(target), "--file-size", "1g", "--op", "read"]
@@ -118,11 +126,14 @@ with tempfile.TemporaryDirectory(dir=args.scratch) as directory:
         folder = output / name
         folder.mkdir()
         command = common + workload + ["--duration", f"{args.duration}s", "--output", "csv"]
-        (folder / "command.txt").write_text(" ".join(command) + "\n")
-        if not perf_ok:
-            (folder / "perf.txt").write_text("unavailable: perf missing or blocked by kernel.perf_event_paranoid\n")
-        evict(target)  # Every workload starts with no cached file pages.
-        with (folder / "tool.csv").open("w") as stream, iostat(folder / "iostat.txt", disk), blktrace(folder, disk):
-            prefix = ["perf", "stat", "-o", str(folder / "perf.txt"), "--"] if perf_ok else []
-            subprocess.run(prefix + command, stdout=stream, check=True)
+        evict(target)  # Request file-page eviction; warmup can populate them again.
+        with tempfile.TemporaryDirectory(dir="/dev/shm") as directory:
+            capture = Path(directory)
+            prefix = ["perf", "stat", "-e", PERF_EVENTS, "-o", str(capture / "perf.txt"), "--"] if perf_ok else []
+            (capture / "command.txt").write_text(" ".join(prefix + command) + "\n")
+            if not perf_ok:
+                (capture / "perf.txt").write_text(f"unavailable: {perf_reason}\n")
+            with (capture / "tool.csv").open("w") as stream, iostat(capture / "iostat.txt", disk), blktrace(capture, disk):
+                subprocess.run(prefix + command, stdout=stream, check=True)
+            shutil.copytree(capture, folder, dirs_exist_ok=True)
         print(f"{folder}: " + ", ".join(sorted(p.name for p in folder.iterdir())), flush=True)
