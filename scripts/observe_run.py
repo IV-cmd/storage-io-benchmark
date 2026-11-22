@@ -99,7 +99,8 @@ def evict(target):
 def environment(scratch, disk, perf):
     commands = [["uname", "-a"], ["findmnt", "-T", str(scratch), "-o", "SOURCE,FSTYPE,OPTIONS"],
                 ["lsblk", "-o", "NAME,TYPE,SIZE,LOG-SEC,PHY-SEC,ROTA,MODEL"]]
-    lines = [f"disk={disk}", f"perf_stat={'available' if perf else 'unavailable'}", f"perf_events={PERF_EVENTS}",
+    lines = [f"disk={disk}", f"collector_uid={os.geteuid()}", f"perf_stat={'available' if perf else 'unavailable'}",
+             f"perf_events={PERF_EVENTS}",
              "profile_scope=whole process: setup, warmup, measurement, statistics and CSV formatting",
              "block_scope=whole device, including unrelated processes",
              "output_capture=tmpfs; copied to results only after all monitors stop"]
