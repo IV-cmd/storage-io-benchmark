@@ -67,10 +67,56 @@ the raw completed-byte throughput and repeat medians. The earlier AWS all-pass
 table referenced only a directory on its measuring VM; it is not used as
 published validation evidence here.
 
-The buffered gap persists across all three pairs. Additional fio accounting
-is a hypothesis, not a demonstrated cause; short-window VM noise alone does
-not explain this repeated result. The gap remains open. Do not widen the
-tolerance, add artificial work, or describe all six cells as validated.
+The buffered gap persists across all three pairs. The controlled experiment
+below demonstrates instrumentation sensitivity on another runner, but does not
+attribute every percentage point of this earlier gap. The original failures
+remain recorded; do not widen the tolerance or describe all six cells as passing.
+
+## Cached-read investigation
+
+First, the original three-repeat JSON gives these median mean latencies:
+
+| buffered workload | tool mean, microseconds | fio clat, microseconds | fio lat, microseconds |
+|---|---:|---:|---:|
+| sequential 4 KiB | 0.835 | 0.935 | 0.961 |
+| random 4 KiB | 0.957 | 1.047 | 1.074 |
+
+The synchronous fio engine has no separate slat samples (`N=0`), not a measured
+zero submission cost. The lat/clat difference is only about 26–28 ns here.
+Reports now expose both means; `fio_mean_us` remains total latency, and
+`fio_slat_mean_us` is `n/a` without samples. Switching latency fields cannot
+change a throughput verdict.
+
+[Controlled run 45019464171](https://github.com/IV-cmd/storage-io-benchmark/actions/runs/45019464171)
+then used the same populated, prewarmed 1 GiB file, 4 KiB reads, and exactly
+2,000,000 operations per tool/variant, repeated three times with reversed
+order on the middle repeat. Both warmup and time-based stopping were disabled.
+fio explicitly used `psync`, `direct=0`, `norandommap`,
+`random_distribution=random`, and `fadvise_hint=0`. Its `io_size` and
+`number_ios` matched the tool's completed-byte and operation budgets.
+
+| workload | tool MiB/s | fio normal MiB/s | fio reduced-statistics MiB/s | normal delta | reduced-statistics delta |
+|---|---:|---:|---:|---:|---:|
+| seq 4 KiB | 6180.8 | 5521.2 | 6156.4 | +11.9% | +0.4% |
+| rand 4 KiB | 5238.6 | 4703.5 | 5232.8 | +11.4% | +0.1% |
+
+The reduced-statistics variant adds `gtod_reduce=1`: fio removes latency and
+other timing work. That nearly eliminates the throughput gap **in this
+experiment**, demonstrating measurement overhead matters at cached-read speeds.
+It is not an acceptance baseline and provides no latency validation. Disabling
+only completion percentiles did not remove the gap; changing the clock source
+was also tested, not assumed to fix it. Exact commands, settings, CSV/JSON,
+and all variants are in `engine-verification/buffered-fixed-operations/`;
+`formatted-candidate` preserves the proposed CMake diagnostic driver. No
+benchmark C++ changes or diagnostic build targets were committed to main.
+
+A separate file-filtered strace check counted exactly 10,000 `pread64` calls
+for each tool. fio `psync` uses `pread`; fio `sync` uses `read` and is not the
+same syscall path. Neither our submit-to-observed-completion interval nor fio's
+clat is an isolated kernel syscall timer: wrapper and completion work differ.
+See the runner [timing boundaries](../src/bench/engine.cc) and fio 3.41's
+[engines](https://github.com/axboe/fio/blob/fio-3.41/engines/sync.c) and
+[completion accounting](https://github.com/axboe/fio/blob/fio-3.41/io_u.c).
 
 ## Profiling scope and limits
 

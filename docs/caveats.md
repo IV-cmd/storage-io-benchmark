@@ -68,3 +68,18 @@ activity, and a short shared-VM experiment is not a hardware performance claim.
 References: Linux [open(2)](https://man7.org/linux/man-pages/man2/open.2.html),
 [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), and
 [io_uring(7)](https://man7.org/linux/man-pages/man7/io_uring.7.html).
+
+## Cached-read throughput includes benchmark overhead
+
+When reads hit RAM, per-operation timing and bookkeeping can be a substantial
+part of runtime. Matching block size and syscalls does not make two benchmark
+loops equally expensive. A fixed-count comparison verified equal completed
+work; reducing fio's timing/statistics work nearly removed the throughput gap
+in that experiment. This is not permission to disable statistics for the
+acceptance comparison or change its 10% tolerance.
+
+fio `psync`, not `sync`, matches this tool's `pread` path. fio's slat/clat/lat
+have different boundaries; absent synchronous slat samples do not mean zero
+overhead. Our interval also includes wrappers and completion observation, not
+just time inside the kernel. See [the measured reconciliation](validation.md#cached-read-investigation)
+for raw evidence, commands, and the limitations of this comparison.

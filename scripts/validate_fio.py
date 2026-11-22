@@ -76,9 +76,10 @@ def fio(target, ioengine, direct, depth, rw, block, folder):
     text = subprocess.check_output(command, text=True)
     job, = json.loads(text)["jobs"]
     assert job["error"] == 0 and job["read"]["io_bytes"] > 0
-    latency = job["read"]["lat_ns"]
+    latency, slat, clat = (job["read"][name] for name in ("lat_ns", "slat_ns", "clat_ns"))
     return text, dict(mib_s=job["read"]["bw_bytes"] / 2**20, mean_us=latency["mean"] / 1000,
-                      p99_us=latency["percentile"]["99.000000"] / 1000)
+                      p99_us=latency["percentile"]["99.000000"] / 1000,
+                      slat_us=slat["mean"] / 1000, slat_samples=slat["N"], clat_us=clat["mean"] / 1000)
 
 
 def warm(target):
@@ -120,8 +121,10 @@ with tempfile.TemporaryDirectory(dir=args.scratch) as directory:
         ours, ref = median["tool"], median["fio"]
         mib_delta = delta(ours["mib_s"], ref["mib_s"])
         rows.append(dict(workload=name, tool_mib_s=f"{ours['mib_s']:.1f}", fio_mib_s=f"{ref['mib_s']:.1f}",
-                         mib_delta_pct=f"{mib_delta:+.1f}", tool_mean_us=f"{ours['mean_us']:.1f}",
-                         fio_mean_us=f"{ref['mean_us']:.1f}", mean_delta_pct=f"{delta(ours['mean_us'], ref['mean_us']):+.1f}",
+                         mib_delta_pct=f"{mib_delta:+.1f}", tool_mean_us=f"{ours['mean_us']:.3f}",
+                         fio_mean_us=f"{ref['mean_us']:.3f}", mean_delta_pct=f"{delta(ours['mean_us'], ref['mean_us']):+.1f}",
+                         fio_slat_mean_us=f"{ref['slat_us']:.3f}" if ref["slat_samples"] else "n/a",
+                         fio_clat_mean_us=f"{ref['clat_us']:.3f}",
                          tool_p99_us=f"{ours['p99_us']:.1f}", fio_p99_us=f"{ref['p99_us']:.1f}",
                          verdict="pass" if abs(mib_delta) <= TOLERANCE_PCT else "FAIL"))
         print(" ".join(f"{k}={v}" for k, v in rows[-1].items()), flush=True)

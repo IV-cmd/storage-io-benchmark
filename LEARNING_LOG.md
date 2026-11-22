@@ -119,3 +119,19 @@ the workload, and matching random distributions does not mean matching offsets.
 1. Why can main CI be green while the repeated fio workflow correctly fails?
 2. Why does near-zero Q2G not prove the kernel has no other bottleneck?
 3. Why would dividing whole-process context switches by the two-second measured window be misleading?
+
+### Follow-up: isolate cached-read measurement overhead
+
+Inspecting the existing fio JSON ruled out lat versus clat alone: their buffered
+mean difference was only about 26–28 ns, and the gate measures throughput.
+Changing fio from psync to sync would also change pread to read, not improve
+workload matching.
+
+A [fixed-count experiment](https://github.com/IV-cmd/storage-io-benchmark/actions/runs/45019464171)
+verified two million completed reads per tool/variant. Normal fio showed
++11.9%/+11.4% tool throughput deltas; diagnostic `gtod_reduce=1` reduced them to
++0.4%/+0.1%. File-filtered strace separately verified ten thousand pread64 calls
+from each tool. Instrumentation therefore matters in this cached-read run,
+but disabling it cannot validate latency or replace the original acceptance
+comparison. The 10% throughput gate is unchanged. See the
+[method and raw evidence](docs/validation.md#cached-read-investigation).
