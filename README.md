@@ -26,6 +26,29 @@ filesystem alignment with `statx` and device logical block size through sysfs,
 allocate aligned buffers, and reject misalignment rather than fall back.
 See [direct-I/O caveats](docs/caveats.md), including actual tmpfs behavior.
 
+## Measured findings
+
+[I/O path analysis](docs/analysis.md) · [Workload tuning](docs/tuning.md) ·
+[Encountered caveats and limits](docs/caveats.md)
+
+Snapshot from [controlled run 45236536614](https://github.com/IV-cmd/storage-io-benchmark/actions/runs/45236536614):
+release build, ext4 on virtual `sda1`, populated 256 MiB file, three repetitions.
+These are guest-path observations, **not physical-media ratings or new fio
+acceptance passes**. The analysis records raw artifacts, cache state and ranges.
+
+| Workload pattern | Measured finding | Conditional starting point |
+|---|---|---|
+| Sequential read, cold-start 4 KiB scan | Default readahead: **721.5 MiB/s**, disabled: **28.4**; both fetched 256 MiB. | Retain the tested 128 KiB default for this scan. |
+| Random read, cache-fitting 4 KiB working set | Warm buffered: **3,686.6 MiB/s**, with zero partition reads. | Use buffered reads when reuse and RAM capacity fit; this is not disk bandwidth. |
+| Write-heavy, sequential 64 KiB hot set | Buffered: **10,235.1 MiB/s** accepted, with **zero interior device writes**. | Volatile buffering only; no durable-write tuning claim. |
+| Latency-sensitive random 4 KiB direct I/O | io_uring depth 4/128 p99: **0.295/56.127 ms**; depth 4 delivered **99.3%** of depth 128 throughput. | Start near the depth-4 knee for throughput, depth 1 for lower tails. |
+
+The tested `none`/`mq-deadline` p99 ranges overlapped; no scheduler winner was
+established. BFQ was not exposed, and the hardware cache-event-pair probe failed;
+neither has invented measurements. The buffered fio discrepancy remains
+[partially reconciled](docs/analysis.md#fio-buffered-read-gap-partially-reconciled-not-closed),
+with the fixed tolerance unchanged. No bare-metal or power-loss behavior was tested.
+
 ## Build and run
 
 Install the prerequisites in the [setup guide](docs/setup.md), then:
@@ -119,8 +142,10 @@ check written bytes. Separate scripts collect exploratory cache/depth evidence;
 main CI records fio tolerance misses as warnings, while the dedicated repeated
 validation workflow fails on them.
 
-See the [cache-bypass observation](docs/cache-bypass.md) for iostat and
-file-residency evidence, [validation](docs/validation.md) for fio settings,
-measured misses, and profiling scope, and [learning notes](LEARNING_LOG.md) for
-failures and limits. No plots or coverage gate are included.
+See the [analysis](docs/analysis.md) for measured cache, readahead, scheduler,
+queue-depth and write behavior, [tuning](docs/tuning.md) for conditional choices,
+and [caveats](docs/caveats.md) for encountered environment traps and untested limits.
+The [earlier cache observation](docs/cache-bypass.md),
+[fio validation](docs/validation.md), and [learning notes](LEARNING_LOG.md)
+retain the original evidence and investigation. No plots or coverage gate are included.
 MIT licensed; see [LICENSE](LICENSE).

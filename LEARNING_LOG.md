@@ -135,3 +135,48 @@ from each tool. Instrumentation therefore matters in this cached-read run,
 but disabling it cannot validate latency or replace the original acceptance
 comparison. The 10% throughput gate is unchanged. See the
 [method and raw evidence](docs/validation.md#cached-read-investigation).
+
+## Controlled I/O-path analysis and tuning
+
+[Run 45236536614](https://github.com/IV-cmd/storage-io-benchmark/actions/runs/45236536614)
+added 63 controlled observations using the existing release CLI, not new engine
+features. A temporary CMake collection target ran only in Actions and was not
+committed. The artifacts preserve that target, collector, exact commands,
+per-trial output, device counters, iostat and perf. The file was populated,
+fsynced and verified evicted before cold-labelled trials; warm trials verified
+full residency. Three repetitions reversed case order in the middle repetition.
+Both device-wide settings were restored and read back afterward.
+
+### What differed from the simple explanation
+
+| What we tried / expected | What the evidence changed |
+|---|---|
+| Increase queue depth for more random-read throughput. | Depth 4 already delivered 99.3% of depth 128's rate; p99 rose from 0.295 to 56.127 ms. At depth 16, p50 was only 0.160 ms while p99 was 36.395 ms. Averages hid the tail. |
+| Look for a scheduler that fixes that tail. | Random-depth-32 p99 ranges overlapped for none and mq-deadline. The experiment did not support a scheduler switch; BFQ was not exposed. |
+| Disable readahead to avoid random waste. | Default readahead fetched 58.637 versus 56.617 MiB for the same 64 MiB random request sequence: 3.6% extra, not a full window per request. Throughput ranges overlapped. Repeated offsets explain why both device/request ratios were below one. |
+| Compare sequential scans with the same byte budget. | Both settings fetched 256 MiB, but default readahead reached 721.5 versus 28.4 MiB/s. Its p50 of 0.821 µs after a cold start is consistent with prefetch warming later requests. Cold start is not all-cold I/O. |
+| Use perf faults to help explain cached reads. | Warm sequential reads had 35,423 process faults versus 367 direct; allocation/statistics also fault. File-cache residency and device counters, not those totals, establish bypass. The hardware-event pair failed on cache-references; no cache-miss count was invented. |
+| Confirm the planned filesystem errors. | Tmpfs and OverlayFS accepted O_DIRECT open; the application refused both with exit 2. The read-mode OverlayFS probes left an upper copy; both paths open read/write, and no intermediate state was sampled. No kernel EINVAL, per-open attribution or OverlayFS performance penalty was fabricated. |
+| Interpret a very fast buffered write result. | 10,235.1 MiB/s accepted with zero interior device writes means repeated cache-fitting updates, not persistent bandwidth. fsync before the next trial does not move durability into the measured interval. |
+
+A final raw-counter check caught an overbroad sentence saying every warm-read
+iostat interval had no device activity. Reads were zero, but some intervals had
+writes. The writeup now distinguishes zero reads from a wholly idle device;
+selected truly idle samples remain quoted. The same rule applies to traces:
+whole-device observations cannot silently become application-only attribution.
+
+The earlier fio investigation is not erased: instrumentation sensitivity was
+demonstrated, but full cross-tool agreement remains unestablished. Neither the
+tolerance nor the normal fio measurement baseline changed. The new write and
+depth observations do not create additional fio acceptance passes.
+
+Full [analysis](docs/analysis.md), [conditional tuning](docs/tuning.md), and
+[encountered caveats](docs/caveats.md) separate findings from untested limits.
+
+### Five-sentence recall
+
+A page-cache hit is not a device read. Readahead helped the single sequential
+scan but fetched some unused random data. More outstanding requests beyond the
+throughput knee mostly increased latency here. The scheduler comparison did
+not establish a winner. Buffered completion, direct completion and fio agreement
+each answer different questions.

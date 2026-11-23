@@ -67,7 +67,8 @@ reused resident data, whereas direct trials started with no file pages resident.
 That is the cache effect being tested, not evidence that RAM throughput is a
 device's read speed. Warm trials started and ended with all 65,536 file pages
 resident; direct trials started and ended with zero. All warm-trial iostat samples
-reported zero reads and writes. For example, `cache-seq-sync-1/iostat.txt` at
+reported zero reads; some included writes, so the whole device was not always
+idle. For example, `cache-seq-sync-1/iostat.txt` at
 18:18:19 UTC shows `r/s=0`, `rkB/s=0`, `aqu-sz=0`, `%util=0`.
 This combination establishes guest file-page-cache bypass for the direct trials,
 not the absence of every storage cache.
