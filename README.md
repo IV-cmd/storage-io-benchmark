@@ -37,7 +37,7 @@ fall back. See [analysis](docs/analysis.md), [tuning](docs/tuning.md) and
 ### Linux read paths
 
 ```mermaid
-flowchart LR
+flowchart TD
     app["Application read"] --> fs["VFS / filesystem"]
     fs -->|Buffered| cache["Guest file-data page cache"]
     cache -->|Hit| done["Data returned to application"]
