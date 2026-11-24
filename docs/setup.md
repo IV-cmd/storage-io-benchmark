@@ -2,11 +2,11 @@
 
 Linux with CMake 3.20+, a C++20 compiler, Git, Make, and Ninja is required.
 Clang 18 supplies the pinned formatter, linter, and sanitizer-build compiler.
-On Ubuntu:
+On Ubuntu 24.04:
 
 ```sh
 sudo apt-get update
-sudo apt-get install -y git make g++ cmake ninja-build clang-18 clang-format-18 clang-tidy-18 liburing-dev sysstat util-linux
+sudo apt-get install -y git make g++ cmake ninja-build clang-18 clang-format-18 clang-tidy-18 liburing-dev sysstat util-linux util-linux-extra python3-venv python3-pip
 ```
 
 `make validate` and `make observe` additionally need `fio`, `blktrace`
@@ -76,12 +76,14 @@ backing mount and device. A virtual disk's ROTA flag alone does not establish
 SSD versus HDD: document the provider's volume type or hardware evidence.
 No SSD/HDD environment or performance result has been validated yet. GitHub
 Actions checks functionality and records exploratory cache/depth observations,
-not validated storage performance.
+not physical-device ratings or universal fio agreement.
 
 Liburing headers/library are required for every build. Cache observations also
-use Python 3, `iostat` (`sysstat`), and `fincore` (`util-linux`). CI installs
-liburing/sysstat and uses the runner's Python/util-linux. No sanitizer
-suppressions are needed. Plotting (pandas/matplotlib) is not part of these checks.
+use Python 3, `iostat` (`sysstat`), and `fincore` (`util-linux-extra` on Ubuntu
+24.04). CI installs these dependencies explicitly. No sanitizer
+suppressions are needed. Plotting uses Python 3.10+ with the pinned packages in
+`requirements.txt`; see [plot reproduction](plotting.md). CI regenerates the
+committed plots and checks that they match their preserved CSV inputs.
 
 For GitHub-only editing, manual CI accepts an optional `sources` JSON map of
 proposed C++ files. Actions formats/checks those files without committing; after

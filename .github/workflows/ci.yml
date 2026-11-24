@@ -88,6 +88,15 @@ jobs:
           lsblk -o NAME,TYPE,SIZE,LOG-SEC,PHY-SEC,ROTA,MODEL >> results/host-probe.txt
       - name: Check Python syntax
         run: python3 -m py_compile scripts/plot.py docs/data/collect.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Reproduce committed plots from preserved CSVs
+        run: |
+          python -m pip install -r requirements.txt
+          make plots PLOT_DIR="$RUNNER_TEMP/plots"
+          diff -rq docs/plots "$RUNNER_TEMP/plots"
       - name: Build
         run: make build
       - name: Check formatting
