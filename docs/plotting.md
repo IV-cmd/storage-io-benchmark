@@ -60,6 +60,10 @@ Lines join measured block sizes/depths; they are not fitted curves. Repetition
 summaries are reduced independently: the median of per-run p99s is not the p99
 of pooled samples. A CDF describes recorded operations, not a latency guarantee.
 CI checks regeneration from preserved inputs, not performance regressions.
+Image comparison uses Matplotlib's RMS tolerance of 0.2 on 0–255 color values:
+otherwise identical captures differed at 16 axis-corner pixels across runners.
+This allows subpixel rendering variation, not changes to CSV values or fio's
+±10% throughput acceptance threshold.
 The fio CSV rounds rates and deltas; its arithmetic check allows that published
 rounding, not a widened acceptance tolerance.
 

@@ -153,10 +153,13 @@ jobs:
           from pathlib import Path
           from matplotlib.testing.compare import compare_images
           output = Path(os.environ["RUNNER_TEMP"]) / "plots"
-          for expected in sorted(Path("docs/plots").glob("*.png")):
-              print(expected.name, compare_images(str(expected), str(output / expected.name), tol=0))
+          expected = sorted(Path("docs/plots").glob("*.png"))
+          assert {p.name for p in output.glob("*.png")} == {p.name for p in expected}
+          for path in expected:
+              difference = compare_images(str(path), str(output / path.name), tol=0.2)
+              assert difference is None, difference
+              print(path.name, "matches")
           PYTHON
-          diff -rq docs/plots "$RUNNER_TEMP/plots"
       - name: Preserve regenerated images on failure
         if: failure()
         uses: actions/upload-artifact@v4
