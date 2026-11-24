@@ -1,0 +1,1 @@
+/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpshbfhf_d/validate.data --file-size 1g --engine odirect --iodepth 1 --pattern rand --op read --block-size 64k --duration 5s --warmup 1s --output csv

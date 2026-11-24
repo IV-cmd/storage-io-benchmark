@@ -1,0 +1,9 @@
+{
+  "commit": "f4af4295bb95bea551aafd0f11540f6aee90666c",
+  "duration_s": 5,
+  "warmup_s": 1,
+  "repeats": 3,
+  "file_size": "1g",
+  "tolerance_pct": 10.0,
+  "run_id": "45015819653"
+}

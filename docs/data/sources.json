@@ -1,0 +1,941 @@
+{
+  "commit": "e990b223c56a26d3fe0a5e4ad474a5f32bf60629",
+  "run_id": "45324316546",
+  "file_size": 268435456,
+  "repeats": 3,
+  "throughput_duration_s": 2,
+  "depth_duration_s": 5,
+  "cache_policy": "buffered reads preloaded; direct reads evicted; setup fsync outside timing",
+  "records": [
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern seq --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 268435456
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern seq --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern seq --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op write --block-size 4096 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op write --block-size 65536 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "throughput",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op write --block-size 1048576 --output csv --duration 2s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 4 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 8 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 16 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 32 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 64 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 128 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 128 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 64 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 32 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 16 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 8 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 4 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 2,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 4 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 8 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 16 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 32 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 64 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "depth",
+      "repeat": 3,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 128 --pattern rand --op read --block-size 4096 --output csv --duration 5s",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "distribution",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine sync --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --ops 100000",
+      "resident_before": 268435456,
+      "resident_after": 268435456
+    },
+    {
+      "group": "distribution",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine odirect --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --ops 100000",
+      "resident_before": 0,
+      "resident_after": 0
+    },
+    {
+      "group": "distribution",
+      "repeat": 1,
+      "command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --engine iouring --iodepth 1 --pattern rand --op read --block-size 4096 --output csv --ops 100000",
+      "resident_before": 0,
+      "resident_after": 0
+    }
+  ],
+  "environment": {
+    "kernel": "Linux runnervmeozm8 7.0.0-1017-azure #17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux\n",
+    "filesystem": "SOURCE    FSTYPE OPTIONS\n/dev/sda1 ext4   rw,relatime,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n",
+    "devices": "NAME    TYPE  SIZE LOG-SEC PHY-SEC ROTA MODEL\nsda     disk  150G     512    4096    1 Virtual Disk\n\u251c\u2500sda1  part  149G     512    4096    1 \n\u251c\u2500sda14 part    4M     512    4096    1 \n\u251c\u2500sda15 part  106M     512    4096    1 \n\u2514\u2500sda16 part  913M     512    4096    1 \n"
+  },
+  "prepare_command": "/home/runner/work/storage-io-benchmark/storage-io-benchmark/build-release/iobench --file /home/runner/work/_temp/tmpfspgv6ds/plot.data --file-size 256m --warmup 0 --op write --block-size 1m --ops 256"
+}

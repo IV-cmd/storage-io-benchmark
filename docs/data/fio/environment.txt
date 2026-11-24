@@ -1,0 +1,10 @@
+Linux runnervm0hi8g 7.0.0-1020-azure #21-Ubuntu SMP PREEMPT Tue Oct 27 22:34:38 UTC 2026 x86_64 GNU/Linux
+fio-3.41
+SOURCE    FSTYPE OPTIONS
+/dev/sda1 ext4   rw,relatime,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback
+NAME    TYPE   SIZE LOG-SEC PHY-SEC ROTA MODEL
+sda     disk   150G     512    4096    1 Virtual Disk
+├─sda1  part 148.9G     512    4096    1 
+├─sda13 part  1023M     512    4096    1 
+├─sda14 part     4M     512    4096    1 
+└─sda15 part   106M     512    4096    1 
