@@ -150,6 +150,7 @@ jobs:
           make plots PLOT_DIR="$RUNNER_TEMP/plots"
           python - <<'PYTHON'
           import os
+          import re
           from pathlib import Path
           from matplotlib.testing.compare import compare_images
           output = Path(os.environ["RUNNER_TEMP"]) / "plots"
@@ -159,6 +160,12 @@ jobs:
               difference = compare_images(str(path), str(output / path.name), tol=0.2)
               assert difference is None, difference
               print(path.name, "matches")
+          embedded = set(re.findall(r"!\[[^\]]*\]\(([^)]+)\)", Path("README.md").read_text()))
+          for path in [*expected, Path("docs/images/cli-run.png")]:
+              assert str(path) in embedded, f"{path}: not embedded in README"
+          for path in embedded:
+              if not path.startswith(("https://", "http://")):
+                  assert Path(path).is_file(), f"{path}: missing README image"
           PYTHON
       - name: Preserve regenerated images on failure
         if: failure()

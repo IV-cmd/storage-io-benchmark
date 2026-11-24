@@ -1,0 +1,7 @@
+No fsync; fio agreement depends on workload and host.
+engine=iouring iodepth=8
+op=read pattern=rand block_size=4096 file_size=16777216 warmup_ns=0
+submitted=16384 completed=16384 max_inflight=8
+operations=16384 elapsed_s=0.203589 MiB/s=314.358182 IOPS=80475.694660
+latency_us  min       mean      p50       p95       p99       max
+            17.341000  99.294882  96.352000  137.534750  204.251390  1735.161000

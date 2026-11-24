@@ -1,0 +1,10 @@
+{
+  "run_url": "https://github.com/IV-cmd/storage-io-benchmark/actions/runs/45334568869",
+  "source_commit": "ed880cbb0f17fe96fb5fd3a1bb9a1e8ca5329318",
+  "command": "./build-release/iobench --engine iouring --pattern rand --op read --block-size 4k --iodepth 8 --file /home/runner/work/_temp/tmp4owyf76k/disposable.data --file-size 16m --ops 16384 --warmup 0",
+  "DEMO_FILE": "/home/runner/work/_temp/tmp4owyf76k/disposable.data",
+  "kernel": "7.0.0-1014-aws",
+  "mount": "SOURCE               FSTYPE OPTIONS\n/dev/mapper/cow-root ext4   rw,relatime,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n",
+  "purpose": "CLI illustration, not a controlled performance comparison",
+  "image": "Terminal-style rendering of the command and unedited stdout, not a live terminal screenshot"
+}

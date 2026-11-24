@@ -9,6 +9,9 @@ pandas/matplotlib visualizations and Linux I/O-path analysis.
 Read cross-validation against fio is partial: the published repeated run passes
 four of six workloads at a fixed ±10% throughput tolerance.
 
+[Architecture](#architecture) · [Quickstart and CLI](#quickstart) ·
+[Measured plots](#measured-results) · [Validation and limits](#validated-divergent-and-untested)
+
 ## Architecture
 
 ```mermaid
@@ -30,6 +33,25 @@ io_uring overlaps requests using independently owned, aligned buffers.
 Direct engines query filesystem/device alignment and fail rather than silently
 fall back. See [analysis](docs/analysis.md), [tuning](docs/tuning.md) and
 [encountered caveats](docs/caveats.md).
+
+### Linux read paths
+
+```mermaid
+flowchart LR
+    app["Application read"] --> fs["VFS / filesystem"]
+    fs -->|Buffered| cache["Guest file-data page cache"]
+    cache -->|Hit| done["Data returned to application"]
+    cache -->|Miss| block["Guest block layer + scheduler"]
+    fs -->|O_DIRECT| block
+    block --> driver["Driver / virtual storage provider"]
+    driver -->|Read completion| done
+```
+
+This is a conceptual path diagram, not a measured trace or timing breakdown.
+Both direct engines still use the filesystem; they bypass the guest file-data
+cache, not every cache in the storage stack. io_uring changes submission,
+completion and concurrency, not that cache distinction. A buffered miss also
+populates the page cache; that return path is omitted for clarity.
 
 ## Quickstart
 
@@ -67,6 +89,24 @@ Sizes accept binary `k`/`m`/`g` suffixes; times accept seconds or `ms`.
 Use `./build-release/iobench --help` for options. Read setup fills new regions
 but does not repair existing sparse/unwritten extents.
 
+### What a run looks like
+
+This project is a CLI, not a graphical application:
+
+![Real io_uring CLI output showing configuration, completion counts, throughput and latency](docs/images/cli-run.png)
+
+Terminal-style rendering of the command and unedited stdout from the
+[Actions example](https://github.com/IV-cmd/storage-io-benchmark/actions/runs/45334568869), not a live terminal screenshot.
+[Raw stdout](docs/images/cli-run.txt) and
+[exact command, host and source commit](docs/images/cli-run.json) are preserved;
+`DEMO_FILE` denotes the disposable file recorded there.
+
+The example uses a 16 MiB file and 16,384 operations to demonstrate the output
+format. It is not a controlled performance comparison or an input to the plots
+below; it uses a different hosted runner and guest storage path. To recreate it,
+run the manual
+[CLI capture workflow](https://github.com/IV-cmd/storage-io-benchmark/actions/workflows/cli-demo.yml).
+
 ## Measured results
 
 The [curve capture](https://github.com/IV-cmd/storage-io-benchmark/actions/runs/45324316546)
@@ -90,6 +130,37 @@ These intentionally contrast cache paths, not equal amounts of device work:
 warm buffered throughput is not physical-device bandwidth. Buffered writes
 measure bytes accepted without fsync, not persistent bandwidth.
 
+### Sequential reads versus block size
+
+![Sequential-read throughput by block size for buffered, O_DIRECT and io_uring engines at depth one](docs/plots/throughput-seq-read.png)
+
+All three engines use depth one. Every repetition is retained, including the
+unexplained buffered-read drop at 1 MiB blocks; the capture did not isolate its
+cause. See the [curve conditions](docs/plotting.md#published-curve-conditions).
+
+### Random reads versus block size
+
+![Random-read throughput by block size for buffered, O_DIRECT and io_uring engines at depth one](docs/plots/throughput-rand-read.png)
+
+Buffered reads start fully resident; direct reads bypass that guest file cache.
+The gap is not evidence that the underlying storage became faster.
+
+### Sequential writes versus block size
+
+![Sequential-write throughput by block size without fsync in the timed interval](docs/plots/throughput-seq-write.png)
+
+These are accepted-byte rates, not durable-media bandwidth. Neither buffered
+nor direct completion establishes power-loss durability in this experiment.
+
+### Random writes versus block size
+
+![Random-write throughput by block size without fsync in the timed interval](docs/plots/throughput-rand-write.png)
+
+Writes repeatedly overwrite the same 256 MiB range with a fixed compressible
+pattern. No fsync is included in timing; this is not a sustained writeback test.
+
+### Queue depth: throughput versus latency
+
 ![Throughput and latency versus io_uring queue depth](docs/plots/queue-depth.png)
 
 The two panels keep throughput and latency on separate, labelled axes. The
@@ -97,8 +168,17 @@ latency panel uses a logarithmic scale so typical values and long tails remain
 visible. Lines connect measured depths; they are not fitted predictions.
 The earlier controlled [readahead/scheduler analysis](docs/analysis.md) is a
 separate capture, not a paired decomposition of these curves.
-The block-size curves are not assumed monotonic; an unexplained buffered-read
-drop is retained and described in [plotting notes](docs/plotting.md#published-curve-conditions).
+
+### Latency distribution
+
+![Empirical latency CDF for buffered, O_DIRECT and io_uring random 4 KiB reads at depth one](docs/plots/latency-cdf.png)
+
+Each curve contains 100,000 observed completions from one distribution run.
+The y-axis gives the percentage completed at or below the latency on the x-axis.
+These are exact empirical CDFs, without smoothing, outlier removal or pooling
+across repetitions. They are separate runs from the depth-sweep summaries.
+
+### fio cross-validation
 
 ![All six fio comparison workloads, including buffered divergences](docs/plots/fio-comparison.png)
 
@@ -107,14 +187,6 @@ not a fresh all-pass claim. Buffered sequential/random throughput differences
 are **+23.3%/+20.5%**. Buffered/direct panels use different y-scales so the small
 direct-I/O rates remain readable.
 
-All seven committed figures:
-[sequential read](docs/plots/throughput-seq-read.png) ·
-[random read](docs/plots/throughput-rand-read.png) ·
-[sequential write](docs/plots/throughput-seq-write.png) ·
-[random write](docs/plots/throughput-rand-write.png) ·
-[queue depth](docs/plots/queue-depth.png) ·
-[latency CDF](docs/plots/latency-cdf.png) ·
-[fio comparison](docs/plots/fio-comparison.png).
 Inputs, aggregation and provenance are documented in [plotting](docs/plotting.md).
 
 ## Validated, divergent and untested
