@@ -1,0 +1,50 @@
+name: Collect presentation curves
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install release and plotting dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends g++ cmake ninja-build liburing-dev util-linux
+          python -m pip install -r requirements.txt
+      - name: Check Python syntax and build release
+        run: |
+          python -m py_compile scripts/plot.py docs/data/collect.py
+          make release
+      - name: Collect serial benchmark curves
+        run: python docs/data/collect.py ./build-release/iobench "$RUNNER_TEMP" docs/data
+      - name: Retain the separately published fio experiment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f docs/data/fio/comparison.csv ]; then
+            gh run download 45015819653 --name repeated-fio-validation --dir "$RUNNER_TEMP/fio-reference"
+            mkdir -p docs/data/fio
+            cp -R "$RUNNER_TEMP"/fio-reference/validate-*/. docs/data/fio/
+          fi
+      - name: Generate all seven plots
+        run: make plots
+      - name: Upload curves, source CSVs and provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: presentation
+          path: |
+            docs/data/
+            docs/plots/
+          retention-days: 90
+          if-no-files-found: error

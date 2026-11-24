@@ -38,3 +38,10 @@ validate: release
 observe: release
 	@test -n "$(SCRATCH)" || { echo "usage: make observe SCRATCH=/existing/dir/on/tested/filesystem"; exit 2; }
 	python3 scripts/observe_run.py $(RELEASE_DIR)/iobench $(SCRATCH)
+
+PLOT_DATA ?= docs/data
+PLOT_DIR ?= docs/plots
+
+.PHONY: plots
+plots:
+	python3 scripts/plot.py "$(PLOT_DATA)" --output "$(PLOT_DIR)"

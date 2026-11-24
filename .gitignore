@@ -3,3 +3,8 @@
 *.o
 /results/*
 !/results/.gitkeep
+__pycache__/
+*.py[cod]
+.venv/
+*.data
+/testfile*
